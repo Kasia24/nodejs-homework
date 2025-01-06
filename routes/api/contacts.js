@@ -1,90 +1,108 @@
 const express = require("express");
+const fs = require("fs"); // Moduł do pracy z plikami
+const path = require("path"); // Moduł do manipulacji ścieżkami plików
 
 const router = express.Router();
 
-// Sample in-memory contacts list
-let contacts = [
-  {
-    id: "AeHIrLTr6JkxGE6SN-0Rw",
-    name: "Allen Raymond",
-    email: "nulla.ante@vestibul.co.uk",
-    phone: "(992) 914-3792",
-  },
-  {
-    id: "qdggE76Jtbfd9eWJHrssH",
-    name: "Chaim Lewis",
-    email: "dui.in@egetlacus.ca",
-    phone: "(294) 840-6685",
-  },
-  {
-    id: "drsAJ4SHPYqZeG-83QTVW",
-    name: "Kennedy Lane",
-    email: "mattis.Cras@nonenimMauris.net",
-    phone: "(542) 451-7038",
-  },
-  // Add more contacts as needed...
-];
+// Funkcja do odczytania danych z pliku JSON
+const getContacts = () => {
+  const data = fs.readFileSync(path.join(__dirname, "./models/contacts.json")); // Wczytanie pliku JSON
+  return JSON.parse(data); // Parsowanie danych JSON
+};
 
-// GET /api/contacts - Get all contacts
+// Trasa GET /api/contacts
 router.get("/", async (req, res) => {
   try {
-    res.json(contacts);
+    const contacts = getContacts(); // Pobieramy dane kontaktów z pliku
+    res.json(contacts); // Zwracamy całą listę kontaktów
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// GET /api/contacts/:contactId - Get a specific contact by ID
+// Trasa GET /api/contacts/:contactId
 router.get("/:contactId", async (req, res) => {
-  const { contactId } = req.params;
-  const contact = contacts.find((c) => c.id === contactId);
+  const { contactId } = req.params; // Pobieramy contactId z URL
+  const contacts = getContacts(); // Pobieramy dane kontaktów z pliku
+  const contact = contacts.find((c) => c.id === contactId); // Szukamy kontaktu o danym ID
+
   if (contact) {
-    res.json(contact);
+    res.json(contact); // Jeśli znaleziono kontakt, zwróć go
   } else {
-    res.status(404).json({ message: "Contact not found" });
+    res.status(404).json({ message: "Kontakt nie został znaleziony" }); // Jeśli nie znaleziono kontaktu, zwróć błąd 404
   }
 });
 
-// POST /api/contacts - Add a new contact
+// Trasa POST /api/contacts - Dodanie nowego kontaktu
 router.post("/", async (req, res) => {
   const { name, email, phone } = req.body;
+
   if (!name || !email || !phone) {
     return res
       .status(400)
       .json({ message: "Name, email, and phone are required" });
   }
+
   const newContact = {
     id: Date.now().toString(), // Simple ID generator (using timestamp)
     name,
     email,
     phone,
   };
-  contacts.push(newContact);
-  res.status(201).json(newContact);
+
+  try {
+    const contacts = await getContacts(); // Pobieramy dane z pliku
+    contacts.push(newContact); // Dodajemy nowy kontakt
+    await saveContacts(contacts); // Zapisujemy zmiany do pliku
+    res.status(201).json(newContact); // Zwracamy nowy kontakt
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
-// DELETE /api/contacts/:contactId - Delete a specific contact by ID
+// Trasa DELETE /api/contacts/:contactId - Usunięcie kontaktu
 router.delete("/:contactId", async (req, res) => {
   const { contactId } = req.params;
-  contacts = contacts.filter((c) => c.id !== contactId);
-  res.status(204).end(); // No content, successful deletion
+
+  try {
+    const contacts = await getContacts(); // Pobieramy dane kontaktów z pliku
+    const updatedContacts = contacts.filter((c) => c.id !== contactId); // Usuwamy kontakt o danym ID
+
+    if (contacts.length === updatedContacts.length) {
+      return res.status(404).json({ message: "Kontakt nie został znaleziony" });
+    }
+
+    await saveContacts(updatedContacts); // Zapisujemy zmiany w pliku
+    res.status(204).end(); // No content, successful deletion
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
-// PUT /api/contacts/:contactId - Update a contact by ID
+// Trasa PUT /api/contacts/:contactId - Aktualizacja kontaktu
 router.put("/:contactId", async (req, res) => {
   const { contactId } = req.params;
   const { name, email, phone } = req.body;
-  const contactIndex = contacts.findIndex((c) => c.id === contactId);
-  if (contactIndex !== -1) {
-    if (!name || !email || !phone) {
-      return res
-        .status(400)
-        .json({ message: "Name, email, and phone are required" });
+
+  if (!name || !email || !phone) {
+    return res
+      .status(400)
+      .json({ message: "Name, email, and phone are required" });
+  }
+
+  try {
+    const contacts = await getContacts(); // Pobieramy dane kontaktów z pliku
+    const contactIndex = contacts.findIndex((c) => c.id === contactId);
+
+    if (contactIndex !== -1) {
+      contacts[contactIndex] = { id: contactId, name, email, phone };
+      await saveContacts(contacts); // Zapisujemy zmiany w pliku
+      res.json(contacts[contactIndex]); // Zwracamy zaktualizowany kontakt
+    } else {
+      res.status(404).json({ message: "Kontakt nie został znaleziony" });
     }
-    contacts[contactIndex] = { id: contactId, name, email, phone };
-    res.json(contacts[contactIndex]);
-  } else {
-    res.status(404).json({ message: "Contact not found" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
