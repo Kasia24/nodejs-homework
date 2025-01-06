@@ -2,7 +2,7 @@ const express = require("express");
 
 const router = express.Router();
 
-// Przykładowa lista kontaktów (w prawdziwej aplikacji dane będą pochodzić z bazy danych)
+// Sample in-memory contacts list
 let contacts = [
   {
     id: "AeHIrLTr6JkxGE6SN-0Rw",
@@ -22,30 +22,70 @@ let contacts = [
     email: "mattis.Cras@nonenimMauris.net",
     phone: "(542) 451-7038",
   },
-  // Dodaj więcej kontaktów, jeśli chcesz
+  // Add more contacts as needed...
 ];
 
-// Trasa GET /api/contacts
+// GET /api/contacts - Get all contacts
 router.get("/", async (req, res) => {
   try {
-    res.json(contacts); // Zwracamy całą listę kontaktów
+    res.json(contacts);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// Trasa GET /api/contacts/:contactId
+// GET /api/contacts/:contactId - Get a specific contact by ID
 router.get("/:contactId", async (req, res) => {
-  const { contactId } = req.params; // Pobieramy contactId z URL
-  const contact = contacts.find((c) => c.id === contactId); // Szukamy kontaktu o danym ID
-
+  const { contactId } = req.params;
+  const contact = contacts.find((c) => c.id === contactId);
   if (contact) {
-    res.json(contact); // Jeśli znaleziono kontakt, zwróć go
+    res.json(contact);
   } else {
-    res.status(404).json({ message: "Kontakt nie został znaleziony" }); // Jeśli nie znaleziono kontaktu, zwróć błąd 404
+    res.status(404).json({ message: "Contact not found" });
   }
 });
 
-// Inne trasy (POST, DELETE, PUT) możesz dodać podobnie jak wcześniej...
+// POST /api/contacts - Add a new contact
+router.post("/", async (req, res) => {
+  const { name, email, phone } = req.body;
+  if (!name || !email || !phone) {
+    return res
+      .status(400)
+      .json({ message: "Name, email, and phone are required" });
+  }
+  const newContact = {
+    id: Date.now().toString(), // Simple ID generator (using timestamp)
+    name,
+    email,
+    phone,
+  };
+  contacts.push(newContact);
+  res.status(201).json(newContact);
+});
+
+// DELETE /api/contacts/:contactId - Delete a specific contact by ID
+router.delete("/:contactId", async (req, res) => {
+  const { contactId } = req.params;
+  contacts = contacts.filter((c) => c.id !== contactId);
+  res.status(204).end(); // No content, successful deletion
+});
+
+// PUT /api/contacts/:contactId - Update a contact by ID
+router.put("/:contactId", async (req, res) => {
+  const { contactId } = req.params;
+  const { name, email, phone } = req.body;
+  const contactIndex = contacts.findIndex((c) => c.id === contactId);
+  if (contactIndex !== -1) {
+    if (!name || !email || !phone) {
+      return res
+        .status(400)
+        .json({ message: "Name, email, and phone are required" });
+    }
+    contacts[contactIndex] = { id: contactId, name, email, phone };
+    res.json(contacts[contactIndex]);
+  } else {
+    res.status(404).json({ message: "Contact not found" });
+  }
+});
 
 module.exports = router;
