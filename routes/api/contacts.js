@@ -20,6 +20,16 @@ const saveContacts = (contacts) => {
     "utf-8"
   ); // Zapisujemy dane w formacie JSON
 };
+const Joi = require("joi");
+
+// Schemat walidacji dla kontaktu
+const contactSchema = Joi.object({
+  name: Joi.string().min(3).max(30).required(), // Imię musi mieć od 3 do 30 znaków
+  email: Joi.string().email().required(), // Poprawny adres e-mail
+  phone: Joi.string()
+    .pattern(/^\(\d{3}\) \d{3}-\d{4}$/) // Numer w formacie np. (123) 456-7890
+    .required(),
+});
 
 // Trasa GET /api/contacts
 router.get("/", async (req, res) => {
@@ -44,14 +54,13 @@ router.get("/:contactId", async (req, res) => {
   }
 });
 
-// Trasa POST /api/contacts - Dodanie nowego kontaktu
 router.post("/", async (req, res) => {
   const { name, email, phone } = req.body;
 
-  if (!name || !email || !phone) {
-    return res
-      .status(400)
-      .json({ message: "Name, email, and phone are required" });
+  // Walidacja danych wejściowych
+  const { error } = contactSchema.validate({ name, email, phone });
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message }); // Zwróć szczegółowy błąd walidacji
   }
 
   const newContact = {
@@ -70,7 +79,6 @@ router.post("/", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
 // Trasa DELETE /api/contacts/:contactId - Usunięcie kontaktu
 router.delete("/:contactId", async (req, res) => {
   const { contactId } = req.params;
@@ -95,10 +103,10 @@ router.put("/:contactId", async (req, res) => {
   const { contactId } = req.params;
   const { name, email, phone } = req.body;
 
-  if (!name || !email || !phone) {
-    return res
-      .status(400)
-      .json({ message: "Name, email, and phone are required" });
+  // Walidacja danych wejściowych
+  const { error } = contactSchema.validate({ name, email, phone });
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message }); // Zwróć szczegółowy błąd walidacji
   }
 
   try {
