@@ -11,6 +11,16 @@ const getContacts = () => {
   return JSON.parse(data); // Parsowanie danych JSON
 };
 
+// Funkcja do zapisu danych do pliku JSON
+const saveContacts = (contacts) => {
+  const contactsFilePath = path.join(__dirname, "models", "contacts.json"); // Ścieżka względna
+  fs.writeFileSync(
+    contactsFilePath,
+    JSON.stringify(contacts, null, 2),
+    "utf-8"
+  ); // Zapisujemy dane w formacie JSON
+};
+
 // Trasa GET /api/contacts
 router.get("/", async (req, res) => {
   try {
@@ -52,9 +62,9 @@ router.post("/", async (req, res) => {
   };
 
   try {
-    const contacts = await getContacts(); // Pobieramy dane z pliku
+    const contacts = getContacts(); // Pobieramy dane z pliku
     contacts.push(newContact); // Dodajemy nowy kontakt
-    await saveContacts(contacts); // Zapisujemy zmiany do pliku
+    saveContacts(contacts); // Zapisujemy zmiany do pliku
     res.status(201).json(newContact); // Zwracamy nowy kontakt
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -66,14 +76,14 @@ router.delete("/:contactId", async (req, res) => {
   const { contactId } = req.params;
 
   try {
-    const contacts = await getContacts(); // Pobieramy dane kontaktów z pliku
+    const contacts = getContacts(); // Pobieramy dane kontaktów z pliku
     const updatedContacts = contacts.filter((c) => c.id !== contactId); // Usuwamy kontakt o danym ID
 
     if (contacts.length === updatedContacts.length) {
       return res.status(404).json({ message: "Kontakt nie został znaleziony" });
     }
 
-    await saveContacts(updatedContacts); // Zapisujemy zmiany w pliku
+    saveContacts(updatedContacts); // Zapisujemy zmiany w pliku
     res.status(204).end(); // No content, successful deletion
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -92,12 +102,12 @@ router.put("/:contactId", async (req, res) => {
   }
 
   try {
-    const contacts = await getContacts(); // Pobieramy dane kontaktów z pliku
+    const contacts = getContacts(); // Pobieramy dane kontaktów z pliku
     const contactIndex = contacts.findIndex((c) => c.id === contactId);
 
     if (contactIndex !== -1) {
       contacts[contactIndex] = { id: contactId, name, email, phone };
-      await saveContacts(contacts); // Zapisujemy zmiany w pliku
+      saveContacts(contacts); // Zapisujemy zmiany w pliku
       res.json(contacts[contactIndex]); // Zwracamy zaktualizowany kontakt
     } else {
       res.status(404).json({ message: "Kontakt nie został znaleziony" });
