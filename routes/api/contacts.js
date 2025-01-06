@@ -6,7 +6,7 @@ const router = express.Router();
 
 // Funkcja do odczytania danych z pliku JSON
 const getContacts = () => {
-  const data = fs.readFileSync(path.join(__dirname, "./models/contacts.json")); // Wczytanie pliku JSON
+  const data = fs.readFileSync(path.join(__dirname, "./contacts.json")); // Wczytanie pliku JSON
   return JSON.parse(data); // Parsowanie danych JSON
 };
 
