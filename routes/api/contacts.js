@@ -20,7 +20,6 @@ const saveContacts = (contacts) => {
 };
 
 const Joi = require("joi");
-console.log("Contacts file path:", contactsFilePath);
 
 // Schemat walidacji dla kontaktu
 const contactSchema = Joi.object({
