@@ -1,6 +1,6 @@
 const express = require("express");
 const Joi = require("joi");
-const Contact = require("../../models/contact"); // Model Mongoose
+const Contact = require("..//../models/contacts"); // Model Mongoose
 
 const router = express.Router();
 

@@ -6,10 +6,10 @@ const connectDB = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log("Database connection successful");
+    console.log(`Database connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`Error: ${error.message}`);
-    process.exit(1);
+    process.exit(1); // Zakończ proces w przypadku błędu
   }
 };
 
