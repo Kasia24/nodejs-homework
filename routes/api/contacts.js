@@ -1,25 +1,39 @@
 const express = require("express");
-const fs = require("fs"); // Moduł do pracy z plikami
-const path = require("path"); // Moduł do manipulacji ścieżkami plików
+const fs = require("fs");
+const path = require("path");
 
 const router = express.Router();
 
-// Funkcja do odczytania danych z pliku JSON
 const getContacts = () => {
-  const contactsFilePath = path.join(__dirname, "models", "contacts.json"); // Ścieżka względna
-  const data = fs.readFileSync(contactsFilePath, "utf-8"); // Wczytanie pliku JSON
-  return JSON.parse(data); // Parsowanie danych JSON
+  // Używamy process.cwd() do wskazania katalogu głównego projektu
+  const contactsFilePath = path.join(
+    __dirname,
+    "..",
+    "..",
+    "models",
+    "contacts.json"
+  );
+  console.log("Contacts file path:", contactsFilePath); // Wypiszmy ścieżkę, by upewnić się, że jest poprawna
+  const data = fs.readFileSync(contactsFilePath, "utf-8");
+  return JSON.parse(data);
 };
 
-// Funkcja do zapisu danych do pliku JSON
 const saveContacts = (contacts) => {
-  const contactsFilePath = path.join(__dirname, "models", "contacts.json"); // Ścieżka względna
+  // Używamy process.cwd() do wskazania katalogu głównego projektu
+  const contactsFilePath = path.join(
+    __dirname,
+    "..",
+    "..",
+    "models",
+    "contacts.json"
+  );
   fs.writeFileSync(
     contactsFilePath,
     JSON.stringify(contacts, null, 2),
     "utf-8"
-  ); // Zapisujemy dane w formacie JSON
+  );
 };
+
 const Joi = require("joi");
 
 // Schemat walidacji dla kontaktu
