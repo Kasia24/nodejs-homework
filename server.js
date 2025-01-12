@@ -1,5 +1,18 @@
-const app = require("./app");
+const express = require("express");
+const dotenv = require("dotenv");
+const connectDB = require("./db");
+const contactsRouter = require("./routes/api/contacts");
 
-app.listen(4000, () => {
-  console.log("Server running. Use our API on port: 4000");
+dotenv.config();
+connectDB();
+
+const app = express();
+app.use(express.json());
+
+app.use("/api/contacts", contactsRouter);
+
+const PORT = process.env.PORT || 4000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
