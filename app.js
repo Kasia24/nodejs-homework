@@ -2,7 +2,7 @@ const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
 
-const contactsRouter = require("./db/contacts");
+const contactsRouter = require("./routes/api/contacts"); // Poprawiona ścieżka importu
 
 const app = express();
 
@@ -12,7 +12,7 @@ app.use(logger(formatsLogger));
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/contacts", contactsRouter);
+app.use("/api/contacts", contactsRouter); // Łączenie routa z routerem
 
 app.get("/favicon.ico", (req, res) => res.status(204)); // Obsługa favicon
 
