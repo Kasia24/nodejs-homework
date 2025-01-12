@@ -1,9 +1,17 @@
 const fs = require("fs");
 const path = require("path");
 
+const router = express.Router();
+
 const getContacts = () => {
   // Używamy process.cwd() do wskazania katalogu głównego projektu
-  const contactsFilePath = path.join(process.cwd(), "db", "contacts.json");
+  const contactsFilePath = path.join(
+    __dirname,
+    "..",
+    "..",
+    "models",
+    "contacts.json"
+  );
   console.log("Contacts file path:", contactsFilePath); // Wypiszmy ścieżkę, by upewnić się, że jest poprawna
   const data = fs.readFileSync(contactsFilePath, "utf-8");
   return JSON.parse(data);
@@ -11,7 +19,13 @@ const getContacts = () => {
 
 const saveContacts = (contacts) => {
   // Używamy process.cwd() do wskazania katalogu głównego projektu
-  const contactsFilePath = path.join(process.cwd(), "db", "contacts.json");
+  const contactsFilePath = path.join(
+    __dirname,
+    "..",
+    "..",
+    "models",
+    "contacts.json"
+  );
   fs.writeFileSync(
     contactsFilePath,
     JSON.stringify(contacts, null, 2),
