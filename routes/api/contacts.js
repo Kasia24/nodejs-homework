@@ -1,27 +1,26 @@
-const express = require("express");
-const fs = require("fs"); // Moduł do pracy z plikami
-const path = require("path"); // Moduł do manipulacji ścieżkami plików
+const fs = require("fs");
+const path = require("path");
 
-const router = express.Router();
-
-// Funkcja do odczytania danych z pliku JSON
 const getContacts = () => {
+  // Używamy process.cwd() do wskazania katalogu głównego projektu
   const contactsFilePath = path.join(process.cwd(), "db", "contacts.json");
-  // Ścieżka względna
-  const data = fs.readFileSync(contactsFilePath, "utf-8"); // Wczytanie pliku JSON
-  return JSON.parse(data); // Parsowanie danych JSON
+  console.log("Contacts file path:", contactsFilePath); // Wypiszmy ścieżkę, by upewnić się, że jest poprawna
+  const data = fs.readFileSync(contactsFilePath, "utf-8");
+  return JSON.parse(data);
 };
 
-// Funkcja do zapisu danych do pliku JSON
 const saveContacts = (contacts) => {
-  const contactsFilePath = path.join(process.cwd(), "db", "contacts.json"); // Ścieżka względna
+  // Używamy process.cwd() do wskazania katalogu głównego projektu
+  const contactsFilePath = path.join(process.cwd(), "db", "contacts.json");
   fs.writeFileSync(
     contactsFilePath,
     JSON.stringify(contacts, null, 2),
     "utf-8"
-  ); // Zapisujemy dane w formacie JSON
+  );
 };
+
 const Joi = require("joi");
+console.log("Contacts file path:", contactsFilePath);
 
 // Schemat walidacji dla kontaktu
 const contactSchema = Joi.object({
