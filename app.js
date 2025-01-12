@@ -14,6 +14,8 @@ app.use(express.json());
 
 app.use("/api/contacts", contactsRouter);
 
+app.get("/favicon.ico", (req, res) => res.status(204)); // Obsługa favicon
+
 app.use((req, res) => {
   res.status(404).json({ message: "Not found" });
 });
