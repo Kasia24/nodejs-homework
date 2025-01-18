@@ -18,8 +18,10 @@ const contactSchema = Joi.object({
 router.get("/", async (req, res) => {
   try {
     const contacts = await Contact.find(); // Pobieranie wszystkich kontaktów z MongoDB
+    console.log("Kontakty z bazy danych:", contacts); // Sprawdź, czy zwraca dane
     res.json(contacts);
   } catch (error) {
+    console.error("Błąd przy pobieraniu kontaktów:", error);
     res.status(500).json({ message: error.message });
   }
 });
