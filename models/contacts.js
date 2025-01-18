@@ -20,10 +20,7 @@ const contactSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-      match: [
-        /^\+?\d{1,3}?[-.\s]?\(?\d{1,4}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/,
-        "Please provide a valid phone number",
-      ],
+      match: [/^\(\d{3}\) \d{3}-\d{4}$/, "Please provide a valid phone number"],
     },
     favorite: {
       type: Boolean,
