@@ -46,4 +46,35 @@ router.post("/signup", async (req, res) => {
   }
 });
 
+// Logowanie użytkownika
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const { error } = userSchema.validate(req.body);
+
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(401).json({ message: "Email or password is wrong" });
+    }
+
+    const token = jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: "1h" });
+    user.token = token;
+    await user.save();
+
+    res.status(200).json({
+      token,
+      user: {
+        email: user.email,
+        subscription: user.subscription,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;
