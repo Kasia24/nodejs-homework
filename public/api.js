@@ -1,3 +1,4 @@
+const axios = require("axios");
 export const Api = {
   // Pomocnicza funkcja do pobrania tokenu
   getAuthToken() {
@@ -14,7 +15,7 @@ export const Api = {
 
   // Rejestracja nowego użytkownika
   async register({ email, password }) {
-    const response = await fetch("/users/signup", {
+    const response = await axios.post("/users/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -27,7 +28,7 @@ export const Api = {
 
   // Logowanie użytkownika
   async login({ email, password }) {
-    const response = await fetch("/users/login", {
+    const response = await axios.post("/users/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -41,7 +42,7 @@ export const Api = {
   // Wylogowanie użytkownika
   async logout() {
     const token = this.getAuthToken(); // Użycie centralnej funkcji
-    const response = await fetch("/users/logout", {
+    const response = await axios.post("/users/logout", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -61,7 +62,7 @@ export const Api = {
         params[key] !== undefined && url.searchParams.append(key, params[key])
     );
 
-    const response = await fetch(url, {
+    const response = await axios.post(url, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -75,7 +76,7 @@ export const Api = {
   // Pobierz pojedynczy kontakt po ID
   async getContactById(contactId) {
     const token = this.getAuthToken(); // Użycie centralnej funkcji
-    const response = await fetch(`/api/contacts/${contactId}`, {
+    const response = await axios.post(`/api/contacts/${contactId}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -88,7 +89,7 @@ export const Api = {
   // Dodaj nowy kontakt
   async addContact({ name, email, phone, favorite }) {
     const token = this.getAuthToken(); // Użycie centralnej funkcji
-    const response = await fetch("/api/contacts", {
+    const response = await axios.post("/api/contacts", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -103,7 +104,7 @@ export const Api = {
   // Zaktualizuj kontakt
   async updateContact({ contactId, name, email, phone, favorite }) {
     const token = this.getAuthToken(); // Użycie centralnej funkcji
-    const response = await fetch(`/api/contacts/${contactId}`, {
+    const response = await axios.post(`/api/contacts/${contactId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -118,7 +119,7 @@ export const Api = {
   // Zaktualizuj status ulubionego kontaktu
   async updateFavorite(contactId, favorite) {
     const token = this.getAuthToken(); // Użycie centralnej funkcji
-    const response = await fetch(`/api/contacts/${contactId}/favorite`, {
+    const response = await axios.post(`/api/contacts/${contactId}/favorite`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -136,7 +137,7 @@ export const Api = {
   // Usuń kontakt
   async deleteContact(contactId) {
     const token = this.getAuthToken(); // Użycie centralnej funkcji
-    const response = await fetch(`/api/contacts/${contactId}`, {
+    const response = await axios.post(`/api/contacts/${contactId}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -149,7 +150,7 @@ export const Api = {
   // Pobierz aktualnego użytkownika
   async getCurrentUser() {
     const token = this.getAuthToken(); // Użycie centralnej funkcji
-    const response = await fetch("/users/current", {
+    const response = await axios.post("/users/current", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -163,7 +164,7 @@ export const Api = {
   // Wygeneruj JWT dla aktualnego użytkownika (opcjonalne)
   async generateJwt() {
     const token = this.getAuthToken(); // Użycie centralnej funkcji
-    const response = await fetch("/users/jwts", {
+    const response = await axios.post("/users/jwts", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
