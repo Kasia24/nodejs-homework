@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
     signupMessage.textContent = ""; // Resetowanie komunikatu
 
     try {
-      const response = await axios.post("http://localhost:5000/users/signup", {
+      const response = await axios.post("/users/signup", {
         email,
         password,
       });
@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
     loginMessage.textContent = ""; // Resetowanie komunikatu
 
     try {
-      const response = await axios.post("http://localhost:5000/users/login", {
+      const response = await axios.post("/users/login", {
         email,
         password,
       });
