@@ -175,7 +175,7 @@ export const Api = {
   // Wygeneruj JWT dla aktualnego użytkownika (opcjonalne)
   async generateJwt() {
     const token = this.getAuthToken(); // Użycie centralnej funkcji
-    const response = await fetch("'http://localhost:5000/users/jwts", {
+    const response = await fetch("http://localhost:5000/users/jwts", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,

@@ -2,6 +2,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const signupForm = document.getElementById("signup-form");
   const loginForm = document.getElementById("login-form");
 
+  // Importowanie axios
+  const axios = require("axios");
+
   // Obsługa formularza rejestracji
   signupForm.addEventListener("submit", async function (e) {
     e.preventDefault();
@@ -13,21 +16,16 @@ document.addEventListener("DOMContentLoaded", function () {
     signupMessage.textContent = ""; // Resetowanie komunikatu
 
     try {
-      const response = await fetch("/users/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
+      const response = await axios.post("http://localhost:5000/users/signup", {
+        email,
+        password,
       });
 
-      const result = await response.json();
-
-      if (response.ok) {
+      if (response.status === 201) {
         signupMessage.textContent = "Rejestracja przebiegła pomyślnie!";
         signupMessage.classList.add("success-message");
       } else {
-        signupMessage.textContent = result.message;
+        signupMessage.textContent = response.data.message;
       }
     } catch (error) {
       signupMessage.textContent = "Wystąpił błąd. Spróbuj ponownie.";
@@ -45,23 +43,18 @@ document.addEventListener("DOMContentLoaded", function () {
     loginMessage.textContent = ""; // Resetowanie komunikatu
 
     try {
-      const response = await fetch("/users/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
+      const response = await axios.post("http://localhost:5000/users/login", {
+        email,
+        password,
       });
 
-      const result = await response.json();
-
-      if (response.ok) {
+      if (response.status === 200) {
         loginMessage.textContent = "Zalogowano pomyślnie!";
         loginMessage.classList.add("success-message");
         // Możesz zapisać token w localStorage lub cookies
-        localStorage.setItem("token", result.token);
+        localStorage.setItem("token", response.data.token);
       } else {
-        loginMessage.textContent = result.message;
+        loginMessage.textContent = response.data.message;
       }
     } catch (error) {
       loginMessage.textContent = "Wystąpił błąd. Spróbuj ponownie.";
