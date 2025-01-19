@@ -1,4 +1,4 @@
-const Contact = require("../models/contact"); // Twój model kontaktu
+const Contact = require("..//models/contacts"); // Twój model kontaktu
 
 // Funkcja do dodawania nowego kontaktu
 async function addContact(req, res) {
