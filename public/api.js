@@ -1,4 +1,17 @@
 export const Api = {
+  // Pomocnicza funkcja do pobrania tokenu
+  getAuthToken() {
+    // Sprawdź, czy kod działa w przeglądarce
+    if (typeof window !== "undefined" && window.localStorage) {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("Brak tokenu autoryzacji. Zaloguj się ponownie.");
+      }
+      return token;
+    }
+    throw new Error("localStorage is not available");
+  },
+
   // Rejestracja nowego użytkownika
   async register({ email, password }) {
     const response = await fetch("/users/signup", {
@@ -27,10 +40,11 @@ export const Api = {
 
   // Wylogowanie użytkownika
   async logout() {
+    const token = this.getAuthToken(); // Użycie centralnej funkcji
     const response = await fetch("/users/logout", {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        Authorization: `Bearer ${token}`,
       },
     });
     if (!response.ok) throw new Error("Wylogowanie nie powiodło się");
@@ -39,6 +53,7 @@ export const Api = {
 
   // Pobierz wszystkie kontakty
   async getContacts({ page = 1, limit = 20, favorite }) {
+    const token = this.getAuthToken(); // Użycie centralnej funkcji
     const url = new URL("/api/contacts", window.location.href);
     const params = { page, limit, favorite };
     Object.keys(params).forEach(
@@ -49,7 +64,7 @@ export const Api = {
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -59,10 +74,11 @@ export const Api = {
 
   // Pobierz pojedynczy kontakt po ID
   async getContactById(contactId) {
+    const token = this.getAuthToken(); // Użycie centralnej funkcji
     const response = await fetch(`/api/contacts/${contactId}`, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        Authorization: `Bearer ${token}`,
       },
     });
     if (!response.ok) throw new Error("Nie udało się pobrać kontaktu");
@@ -71,11 +87,12 @@ export const Api = {
 
   // Dodaj nowy kontakt
   async addContact({ name, email, phone, favorite }) {
+    const token = this.getAuthToken(); // Użycie centralnej funkcji
     const response = await fetch("/api/contacts", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ name, email, phone, favorite }),
     });
@@ -85,11 +102,12 @@ export const Api = {
 
   // Zaktualizuj kontakt
   async updateContact({ contactId, name, email, phone, favorite }) {
+    const token = this.getAuthToken(); // Użycie centralnej funkcji
     const response = await fetch(`/api/contacts/${contactId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ name, email, phone, favorite }),
     });
@@ -99,11 +117,12 @@ export const Api = {
 
   // Zaktualizuj status ulubionego kontaktu
   async updateFavorite(contactId, favorite) {
+    const token = this.getAuthToken(); // Użycie centralnej funkcji
     const response = await fetch(`/api/contacts/${contactId}/favorite`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ favorite }),
     });
@@ -116,10 +135,11 @@ export const Api = {
 
   // Usuń kontakt
   async deleteContact(contactId) {
+    const token = this.getAuthToken(); // Użycie centralnej funkcji
     const response = await fetch(`/api/contacts/${contactId}`, {
       method: "DELETE",
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        Authorization: `Bearer ${token}`,
       },
     });
     if (!response.ok) throw new Error("Usuwanie kontaktu nie powiodło się");
@@ -128,10 +148,11 @@ export const Api = {
 
   // Pobierz aktualnego użytkownika
   async getCurrentUser() {
+    const token = this.getAuthToken(); // Użycie centralnej funkcji
     const response = await fetch("/users/current", {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        Authorization: `Bearer ${token}`,
       },
     });
     if (!response.ok)
@@ -141,10 +162,11 @@ export const Api = {
 
   // Wygeneruj JWT dla aktualnego użytkownika (opcjonalne)
   async generateJwt() {
+    const token = this.getAuthToken(); // Użycie centralnej funkcji
     const response = await fetch("/jwts", {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        Authorization: `Bearer ${token}`,
       },
     });
     if (!response.ok) throw new Error("Nie udało się wygenerować JWT");
