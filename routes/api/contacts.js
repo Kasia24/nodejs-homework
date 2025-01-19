@@ -122,4 +122,21 @@ router.patch("/:contactId/favorite", async (req, res) => {
   }
 });
 
+router.get("/", auth, async (req, res) => {
+  const { page = 1, limit = 20, favorite } = req.query;
+  const skip = (page - 1) * limit;
+  const filter = { owner: req.user._id };
+
+  if (favorite) {
+    filter.favorite = favorite === "true";
+  }
+
+  try {
+    const contacts = await Contact.find(filter).skip(skip).limit(Number(limit));
+    res.json(contacts);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

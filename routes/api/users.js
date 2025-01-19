@@ -77,4 +77,16 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Wylogowanie użytkownika
+router.get("/logout", auth, async (req, res) => {
+  try {
+    const user = req.user;
+    user.token = null;
+    await user.save();
+    res.status(204).end();
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;
