@@ -14,16 +14,9 @@ app.use(cors()); // Umożliwia połączenia z różnych źródeł
 
 // Połączenie z bazą danych
 mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log("Database connected");
-  })
-  .catch((err) => {
-    console.log("Database connection failed:", err);
-  });
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error("Error connecting to MongoDB:", err));
 
 // Konfiguracja tras
 app.use("/users", userRoutes); // Ścieżka dla użytkowników
