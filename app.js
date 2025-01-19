@@ -1,7 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
-const userRouter = require("./routes/user");
+const userRouter = require("./routes/api/users");
 
 dotenv.config(); // Ładowanie zmiennych środowiskowych z .env
 

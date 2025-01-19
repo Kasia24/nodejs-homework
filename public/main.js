@@ -1,56 +1,70 @@
-import { Api } from "./api.js";
+document.addEventListener("DOMContentLoaded", function () {
+  const signupForm = document.getElementById("signup-form");
+  const loginForm = document.getElementById("login-form");
 
-const onSubmit =
-  (callback = async (body) => {}) =>
-  async (event) => {
-    event.preventDefault();
+  // Obsługa formularza rejestracji
+  signupForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
 
-    const form = event.target;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
-    const email = form.elements["email"].value;
-    const password = form.elements["password"].value;
+    const signupMessage = document.getElementById("signup-message");
+    signupMessage.textContent = ""; // Resetowanie komunikatu
 
-    const body = { email, password };
+    try {
+      const response = await fetch("/users/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    console.log(body);
-    await callback(body);
+      const result = await response.json();
 
-    form.reset();
-  };
+      if (response.ok) {
+        signupMessage.textContent = "Rejestracja przebiegła pomyślnie!";
+        signupMessage.classList.add("success-message");
+      } else {
+        signupMessage.textContent = result.message;
+      }
+    } catch (error) {
+      signupMessage.textContent = "Wystąpił błąd. Spróbuj ponownie.";
+    }
+  });
 
-const updateStatus = async () => {
-  const currentUser = await Api.getCurrentUser().catch(() => null);
+  // Obsługa formularza logowania
+  loginForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
 
-  document.querySelector("#status").textContent =
-    currentUser === null ? "Please login" : `Logged in as ${currentUser.email}`;
-};
+    const email = document.getElementById("login-email").value;
+    const password = document.getElementById("login-password").value;
 
-updateStatus().catch();
+    const loginMessage = document.getElementById("login-message");
+    loginMessage.textContent = ""; // Resetowanie komunikatu
 
-document
-  .querySelector("form#register")
-  .addEventListener("submit", onSubmit(Api.register));
+    try {
+      const response = await fetch("/users/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-document.querySelector("form#login").addEventListener(
-  "submit",
-  onSubmit((credentials) => Api.login(credentials).then(updateStatus))
-);
+      const result = await response.json();
 
-document
-  .querySelector("button#logout")
-  .addEventListener("click", () => Api.logout().then(updateStatus));
-
-document
-  .querySelector("button#users")
-  .addEventListener("click", () => Api.getAllUsers().then(console.log));
-
-document.querySelector("button#jwts").addEventListener("click", () =>
-  Api.generateSomeJwt().then(({ token }) => {
-    const parts = token.split(".");
-    const decoded = parts.slice(0, 2).map((part) => atob(part));
-    const jwt = { token, parts, decoded };
-
-    console.log(jwt);
-    alert(JSON.stringify(jwt, null, 2));
-  })
-);
+      if (response.ok) {
+        loginMessage.textContent = "Zalogowano pomyślnie!";
+        loginMessage.classList.add("success-message");
+        // Możesz zapisać token w localStorage lub cookies
+        localStorage.setItem("token", result.token);
+      } else {
+        loginMessage.textContent = result.message;
+      }
+    } catch (error) {
+      loginMessage.textContent = "Wystąpił błąd. Spróbuj ponownie.";
+    }
+  });
+});
