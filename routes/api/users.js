@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const auth = require("..//../middlewares/auth");
 const router = express.Router();
-const { signupUser } = require("../controllers/usersController");
+const { signupUser } = require("..//../controllers/userController");
 
 // Walidacja dla rejestracji
 const signupSchema = Joi.object({
