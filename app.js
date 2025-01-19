@@ -1,23 +1,36 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-const connectDB = require("./config/db");
-const userRouter = require("./routes/api/users");
+const cors = require("cors");
+const userRoutes = require("./routes/users"); // Trasy użytkowników
+const contactRoutes = require("./routes/contacts"); // Trasy kontaktów
 
-dotenv.config(); // Ładowanie zmiennych środowiskowych z .env
-
+dotenv.config();
 const app = express();
 
+// Middleware
+app.use(express.json()); // Umożliwia obsługę JSON w ciele żądania
+app.use(cors()); // Umożliwia połączenia z różnych źródeł
+
 // Połączenie z bazą danych
-connectDB();
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("Database connected");
+  })
+  .catch((err) => {
+    console.log("Database connection failed:", err);
+  });
 
-// Middleware do przetwarzania JSON w żądaniach
-app.use(express.json());
+// Konfiguracja tras
+app.use("/users", userRoutes); // Ścieżka dla użytkowników
+app.use("/contacts", contactRoutes); // Ścieżka dla kontaktów
 
-// Trasy
-app.use("/users", userRouter);
-
-// Uruchomienie aplikacji
-const port = process.env.PORT || 5000;
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+// Uruchomienie serwera
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
