@@ -1,11 +1,32 @@
-const express = require("express");
-const router = express.Router();
-const { signupUser, loginUser } = require("../controllers/userController");
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
-// Trasa rejestracji użytkownika
-router.post("/signup", signupUser);
+const userSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: [true, "Email is required"],
+    unique: true,
+  },
+  password: {
+    type: String,
+    required: [true, "Password is required"],
+  },
+  subscription: {
+    type: String,
+    enum: ["starter", "pro", "business"],
+    default: "starter",
+  },
+  token: {
+    type: String,
+    default: null,
+  },
+});
 
-// Trasa logowania użytkownika
-router.post("/login", loginUser);
+// Metoda porównująca hasła
+userSchema.methods.comparePassword = async function (password) {
+  return bcrypt.compare(password, this.password);
+};
 
-module.exports = router;
+const User = mongoose.model("User", userSchema);
+
+module.exports = User;
