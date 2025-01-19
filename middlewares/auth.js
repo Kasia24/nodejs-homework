@@ -1,27 +1,20 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 
-const SECRET_KEY = "your_secret_key"; // Wymień na klucz środowiskowy
-
 const auth = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization || "";
-    const token = authHeader.replace("Bearer ", "");
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "Not authorized" });
 
-    if (!token) {
-      return res.status(401).json({ message: "Not authorized" });
-    }
-
-    const decoded = jwt.verify(token, SECRET_KEY);
-    const user = await User.findById(decoded.id);
-
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
     if (!user || user.token !== token) {
       return res.status(401).json({ message: "Not authorized" });
     }
 
     req.user = user;
     next();
-  } catch (err) {
+  } catch (error) {
     res.status(401).json({ message: "Not authorized" });
   }
 };
