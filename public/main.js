@@ -2,8 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const signupForm = document.getElementById("signup-form");
   const loginForm = document.getElementById("login-form");
 
-  // Importowanie axios
-  const axios = require("axios");
+  // axios jest teraz dostępne globalnie
 
   // Obsługa formularza rejestracji
   signupForm.addEventListener("submit", async function (e) {
