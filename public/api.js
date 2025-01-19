@@ -14,7 +14,7 @@ export const Api = {
 
   // Rejestracja nowego użytkownika
   async register({ email, password }) {
-    const response = await fetch("/users/signup", {
+    const response = await fetch("http://localhost:5000/users/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -27,7 +27,7 @@ export const Api = {
 
   // Logowanie użytkownika
   async login({ email, password }) {
-    const response = await fetch("/users/login", {
+    const response = await fetch("http://localhost:5000/users/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -41,7 +41,7 @@ export const Api = {
   // Wylogowanie użytkownika
   async logout() {
     const token = this.getAuthToken(); // Użycie centralnej funkcji
-    const response = await fetch("/users/logout", {
+    const response = await fetch("http://localhost:5000/users/logout", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -75,12 +75,15 @@ export const Api = {
   // Pobierz pojedynczy kontakt po ID
   async getContactById(contactId) {
     const token = this.getAuthToken(); // Użycie centralnej funkcji
-    const response = await fetch(`/api/contacts/${contactId}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await fetch(
+      `http://localhost:5000/api/contacts/${contactId}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     if (!response.ok) throw new Error("Nie udało się pobrać kontaktu");
     return await response.json();
   },
@@ -88,7 +91,7 @@ export const Api = {
   // Dodaj nowy kontakt
   async addContact({ name, email, phone, favorite }) {
     const token = this.getAuthToken(); // Użycie centralnej funkcji
-    const response = await fetch("/api/contacts", {
+    const response = await fetch("http://localhost:5000/api/contacts", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -103,14 +106,17 @@ export const Api = {
   // Zaktualizuj kontakt
   async updateContact({ contactId, name, email, phone, favorite }) {
     const token = this.getAuthToken(); // Użycie centralnej funkcji
-    const response = await fetch(`/api/contacts/${contactId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ name, email, phone, favorite }),
-    });
+    const response = await fetch(
+      `http://localhost:5000/api/contacts/${contactId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name, email, phone, favorite }),
+      }
+    );
     if (!response.ok) throw new Error("Aktualizacja kontaktu nie powiodła się");
     return await response.json();
   },
@@ -118,14 +124,17 @@ export const Api = {
   // Zaktualizuj status ulubionego kontaktu
   async updateFavorite(contactId, favorite) {
     const token = this.getAuthToken(); // Użycie centralnej funkcji
-    const response = await fetch(`/api/contacts/${contactId}/favorite`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ favorite }),
-    });
+    const response = await fetch(
+      `http://localhost:5000/api/contacts/${contactId}/favorite`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ favorite }),
+      }
+    );
     if (!response.ok)
       throw new Error(
         "Aktualizacja statusu ulubionego kontaktu nie powiodła się"
@@ -136,12 +145,15 @@ export const Api = {
   // Usuń kontakt
   async deleteContact(contactId) {
     const token = this.getAuthToken(); // Użycie centralnej funkcji
-    const response = await fetch(`/api/contacts/${contactId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await fetch(
+      `http://localhost:5000/api/contacts/${contactId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     if (!response.ok) throw new Error("Usuwanie kontaktu nie powiodło się");
     return response.json();
   },
@@ -149,7 +161,7 @@ export const Api = {
   // Pobierz aktualnego użytkownika
   async getCurrentUser() {
     const token = this.getAuthToken(); // Użycie centralnej funkcji
-    const response = await fetch("/users/current", {
+    const response = await fetch("http://localhost:5000/users/current", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -163,7 +175,7 @@ export const Api = {
   // Wygeneruj JWT dla aktualnego użytkownika (opcjonalne)
   async generateJwt() {
     const token = this.getAuthToken(); // Użycie centralnej funkcji
-    const response = await fetch("/jwts", {
+    const response = await fetch("'http://localhost:5000/users/jwts", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
