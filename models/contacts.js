@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
-const contactSchema = new mongoose.Schema({
+const contactSchema = new Schema({
   name: {
     type: String,
     required: true,
@@ -9,21 +10,14 @@ const contactSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  phone: {
-    type: String,
-    required: true,
-  },
-  favorite: {
-    type: Boolean,
-    default: false,
-  },
+  phone: String,
   owner: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "user", // Powiązanie z użytkownikiem
+    type: Schema.Types.ObjectId,
+    ref: "User",
     required: true,
   },
 });
 
-const Contact = mongoose.model("contact", contactSchema);
+const Contact = mongoose.model("Contact", contactSchema);
 
 module.exports = Contact;
