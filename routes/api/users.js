@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
+const auth = require("..//../middlewares/auth");
 
 const User = require("../../models/user");
 
@@ -15,7 +16,7 @@ const userSchema = Joi.object({
 });
 
 // Rejestracja użytkownika
-router.post("/signup", async (req, res) => {
+router.post("/users/signup", async (req, res) => {
   try {
     const { email, password } = req.body;
     const { error } = userSchema.validate(req.body);
@@ -47,7 +48,7 @@ router.post("/signup", async (req, res) => {
 });
 
 // Logowanie użytkownika
-router.post("/login", async (req, res) => {
+router.post("/users/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     const { error } = userSchema.validate(req.body);
@@ -78,7 +79,7 @@ router.post("/login", async (req, res) => {
 });
 
 // Wylogowanie użytkownika
-router.get("/logout", auth, async (req, res) => {
+router.get("/users/logout", auth, async (req, res) => {
   try {
     const user = req.user;
     user.token = null;
