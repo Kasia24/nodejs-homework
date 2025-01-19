@@ -1,16 +1,20 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-const cors = require("cors");
 const userRoutes = require("./routes/users"); // Trasy użytkowników
 const contactRoutes = require("./routes/contacts"); // Trasy kontaktów
+const path = require("path");
 
 dotenv.config();
 const app = express();
 
+app.use(express.static(path.join(__dirname, "public")));
+
 // Middleware
-app.use(express.json()); // Umożliwia obsługę JSON w ciele żądania
-app.use(cors()); // Umożliwia połączenia z różnych źródeł
+//app.use(express.json()); // Umożliwia obsługę JSON w ciele żądania
+//app.use(cors()); // Umożliwia połączenia z różnych źródeł
+app.use(express.json()); // Obsługa JSON
+app.use(express.urlencoded({ extended: true })); // Obsługa form-urlencoded
 
 // Połączenie z bazą danych
 mongoose
