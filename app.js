@@ -1,27 +1,23 @@
 const express = require("express");
-const logger = require("morgan");
-const cors = require("cors");
+const dotenv = require("dotenv");
+const connectDB = require("./config/db");
+const userRouter = require("./routes/user");
 
-const contactsRouter = require("./routes/api/contacts"); // Poprawiona ścieżka importu
+dotenv.config(); // Ładowanie zmiennych środowiskowych z .env
 
 const app = express();
 
-const formatsLogger = app.get("env") === "development" ? "dev" : "short";
+// Połączenie z bazą danych
+connectDB();
 
-app.use(logger(formatsLogger));
-app.use(cors());
+// Middleware do przetwarzania JSON w żądaniach
 app.use(express.json());
 
-app.use("/api/contacts", contactsRouter); // Łączenie routa z routerem
+// Trasy
+app.use("/users", userRouter);
 
-app.get("/favicon.ico", (req, res) => res.status(204)); // Obsługa favicon
-
-app.use((req, res) => {
-  res.status(404).json({ message: "Not found" });
+// Uruchomienie aplikacji
+const port = process.env.PORT || 5000;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
-
-app.use((err, req, res, next) => {
-  res.status(500).json({ message: err.message });
-});
-
-module.exports = app;
