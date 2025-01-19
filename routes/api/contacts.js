@@ -16,12 +16,21 @@ const contactSchema = Joi.object({
 });
 
 // Trasa GET /api/contacts - Pobierz wszystkie kontakty
-router.get("/", async (req, res) => {
+// Trasa GET /api/contacts - Pobierz wszystkie kontakty z uwzględnieniem autoryzacji i filtracji
+router.get("/", auth, async (req, res) => {
+  const { page = 1, limit = 20, favorite } = req.query; // Parametry strony, limitu i statusu 'favorite'
+  const skip = (page - 1) * limit; // Wyliczanie, które kontakty mają być pobrane na podstawie strony
+  const filter = { owner: req.user._id }; // Filtrujemy po właścicielu kontaktu
+
+  if (favorite) {
+    filter.favorite = favorite === "true"; // Jeśli filtrujemy po 'favorite', dodajemy to do zapytania
+  }
+
   try {
-    const contacts = await Contact.find(); // Pobieranie wszystkich kontaktów z MongoDB
-    res.json(contacts);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    const contacts = await Contact.find(filter).skip(skip).limit(Number(limit)); // Pobieranie kontaktów z MongoDB
+    res.json(contacts); // Zwracanie wyników w formacie JSON
+  } catch (err) {
+    res.status(500).json({ message: err.message }); // Obsługa błędów
   }
 });
 
@@ -120,23 +129,6 @@ router.patch("/:contactId/favorite", async (req, res) => {
     res.json(updatedContact);
   } catch (error) {
     res.status(500).json({ message: error.message });
-  }
-});
-
-router.get("/", auth, async (req, res) => {
-  const { page = 1, limit = 20, favorite } = req.query;
-  const skip = (page - 1) * limit;
-  const filter = { owner: req.user._id };
-
-  if (favorite) {
-    filter.favorite = favorite === "true";
-  }
-
-  try {
-    const contacts = await Contact.find(filter).skip(skip).limit(Number(limit));
-    res.json(contacts);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
   }
 });
 
