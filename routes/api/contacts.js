@@ -1,6 +1,7 @@
 const express = require("express");
 const Joi = require("joi");
 const Contact = require("..//../models/contacts"); // Model Mongoose
+const auth = require("..//../middlewares/auth");
 
 const router = express.Router();
 
