@@ -2,17 +2,25 @@ const express = require("express");
 const router = express.Router();
 const {
   getContacts,
+  getContactById,
   createContact,
+  updateContact,
+  deleteContact,
 } = require("../controllers/contactsController");
-const { authenticate } = require("../middlewares/auth");
 
-// Middleware autoryzacji
-router.use(authenticate);
-
-// GET /api/contacts - pobieranie kontaktów
+// GET /api/contacts - Pobierz wszystkie kontakty
 router.get("/", getContacts);
 
-// POST /api/contacts - tworzenie nowego kontaktu
+// GET /api/contacts/:id - Pobierz kontakt po ID
+router.get("/:id", getContactById);
+
+// POST /api/contacts - Utwórz nowy kontakt
 router.post("/", createContact);
+
+// PUT /api/contacts/:id - Zaktualizuj kontakt po ID
+router.put("/:id", updateContact);
+
+// DELETE /api/contacts/:id - Usuń kontakt po ID
+router.delete("/:id", deleteContact);
 
 module.exports = router;
