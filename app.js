@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors"); // Umożliwia połączenia CORS
 const userRoutes = require("./routes/users"); // Trasy użytkowników
-const contactRoutes = require("./routes/contacts"); // Trasy kontaktów
+const Contacts = require("./routes/contacts"); // Trasy kontaktów
 const path = require("path");
 
 dotenv.config();
@@ -32,7 +32,7 @@ mongoose
 
 // Konfiguracja tras
 app.use("/api/users", userRoutes); // Ścieżka dla użytkowników
-app.use("/api/contacts", contactRoutes); // Ścieżka dla kontaktów
+app.use("/api/contacts", Contacts); // Ścieżka dla kontaktów
 
 // Obsługa błędów 404 (trasa nieznaleziona)
 app.use((req, res, next) => {
