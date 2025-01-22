@@ -1,26 +1,28 @@
 const express = require("express");
 const router = express.Router();
-const {
-  getContacts,
-  getContactById,
-  createContact,
-  updateContact,
-  deleteContact,
-} = require("../controllers/contactsController");
+const Contact = require("../models/contact"); // Model kontaktu
 
-// GET /api/contacts - Pobierz wszystkie kontakty
-router.get("/", getContacts);
+// GET: Pobierz wszystkie kontakty
+router.get("/", async (req, res) => {
+  try {
+    const contacts = await Contact.find(); // Pobiera wszystkie kontakty
+    res.json(contacts); // Zwraca kontakty jako odpowiedź
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching contacts" });
+  }
+});
 
-// GET /api/contacts/:id - Pobierz kontakt po ID
-router.get("/:id", getContactById);
+// POST: Dodaj nowy kontakt
+router.post("/", async (req, res) => {
+  const { name, email, phone, favorite } = req.body;
 
-// POST /api/contacts - Utwórz nowy kontakt
-router.post("/", createContact);
-
-// PUT /api/contacts/:id - Zaktualizuj kontakt po ID
-router.put("/:id", updateContact);
-
-// DELETE /api/contacts/:id - Usuń kontakt po ID
-router.delete("/:id", deleteContact);
+  try {
+    const newContact = new Contact({ name, email, phone, favorite });
+    await newContact.save(); // Zapisuje nowy kontakt w bazie
+    res.status(201).json(newContact); // Zwraca nowo utworzony kontakt
+  } catch (err) {
+    res.status(400).json({ message: "Error creating contact" });
+  }
+});
 
 module.exports = router;
