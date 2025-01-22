@@ -4,7 +4,7 @@ const {
   getContacts,
   createContact,
 } = require("../controllers/contactsController");
-const { authenticate } = require("../middleware/authenticate");
+const { authenticate } = require("../middlewares/auth");
 
 // Middleware autoryzacji
 router.use(authenticate);
