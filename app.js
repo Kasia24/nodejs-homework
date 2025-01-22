@@ -4,11 +4,13 @@ const dotenv = require("dotenv");
 const userRoutes = require("./routes/users"); // Trasy użytkowników
 const contactRoutes = require("./routes/contacts"); // Trasy kontaktów
 const path = require("path");
-
+const Contact = require("..//../models/contacts");
 dotenv.config();
 const app = express();
 
 app.use(express.static(path.join(__dirname, "public")));
+
+app.use("/api/contacts", Contact);
 
 // Middleware
 //app.use(express.json()); // Umożliwia obsługę JSON w ciele żądania
