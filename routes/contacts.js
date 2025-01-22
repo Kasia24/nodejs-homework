@@ -1,10 +1,18 @@
 const express = require("express");
-const { addContact, getContacts } = require("../controllers/contactController"); // Import funkcji z kontrolera
-const auth = require("../middlewares/auth"); // Middleware do autoryzacji użytkownika
 const router = express.Router();
+const {
+  getContacts,
+  createContact,
+} = require("../controllers/contactsController");
+const { authenticate } = require("../middleware/authenticate");
 
-// Różne endpointy dla kontaktów
-router.post("/", auth, addContact); // Dodawanie kontaktu wymaga autoryzacji
-router.get("/", auth, getContacts); // Pobieranie kontaktów wymaga autoryzacji
+// Middleware autoryzacji
+router.use(authenticate);
+
+// GET /api/contacts - pobieranie kontaktów
+router.get("/", getContacts);
+
+// POST /api/contacts - tworzenie nowego kontaktu
+router.post("/", createContact);
 
 module.exports = router;

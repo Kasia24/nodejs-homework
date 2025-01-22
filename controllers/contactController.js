@@ -1,39 +1,23 @@
-const Contact = require("..//models/contacts"); // Twój model kontaktu
+const Contact = require("../models/contacts");
 
-// Funkcja do dodawania nowego kontaktu
-async function addContact(req, res) {
-  const { name, email, phone } = req.body;
-  const owner = req.user._id; // Pobieramy właściciela kontaktu z danych użytkownika
-
-  const contact = new Contact({
-    name,
-    email,
-    phone,
-    owner, // Powiązanie kontaktu z użytkownikiem
-  });
-
+const getContacts = async (req, res) => {
   try {
+    const contacts = await Contact.find({ owner: req.user._id });
+    res.status(200).json(contacts);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+const createContact = async (req, res) => {
+  try {
+    const { name, email, phone } = req.body;
+    const contact = new Contact({ name, email, phone, owner: req.user._id });
     await contact.save();
     res.status(201).json(contact);
-  } catch (err) {
-    res.status(500).json({ message: "Error adding contact" });
+  } catch (error) {
+    res.status(400).json({ message: "Bad request" });
   }
-}
-
-// Funkcja do pobierania kontaktów dla aktualnego użytkownika
-async function getContacts(req, res) {
-  const owner = req.user._id;
-
-  try {
-    const contacts = await Contact.find({ owner }); // Pobranie tylko kontaktów przypisanych do aktualnego użytkownika
-    res.status(200).json(contacts);
-  } catch (err) {
-    res.status(500).json({ message: "Error retrieving contacts" });
-  }
-}
-
-// Eksport funkcji
-module.exports = {
-  addContact,
-  getContacts,
 };
+
+module.exports = { getContacts, createContact };
