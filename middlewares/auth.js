@@ -1,5 +1,5 @@
 import { JWT } from "../lib/jwt.js";
-import { Users, UserRole } from "../models/user.js";
+import { User, UserRole } from "../models/user.js";
 import { HttpError } from "../models/HttpError.js";
 
 export const auth =
@@ -20,7 +20,7 @@ export const auth =
       return next(new HttpError(401, "Malformed token."));
     }
 
-    const user = await Users.findById(tokenData?.data?.id);
+    const user = await User.findById(tokenData?.data?.id);
 
     if (!user || !roles.includes(user?.role)) {
       // return res.status(403).json({ error: "Unauthorized." });
