@@ -21,6 +21,15 @@ const UserSchema = new Schema({
     enum: [UserRole.ADMIN, UserRole.USER],
     default: UserRole.USER,
   },
+  subscription: {
+    type: String,
+    enum: ["starter", "pro", "business"],
+    default: "starter",
+  },
+  token: {
+    type: String,
+    default: null,
+  },
 });
 
 export const Users = mongoose.model("user", UserSchema);
