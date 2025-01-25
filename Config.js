@@ -7,7 +7,7 @@ class Config {
   #_COOKIE_SECRET;
 
   constructor() {
-    this.#_PORT = this.#normalizePort(this.#getEnv("PORT", "3001"));
+    this.#_PORT = this.#normalizePort(this.#getEnv("PORT", "5000"));
     this.#_MONGODB_URI = this.#getEnv("MONGODB_URI");
     this.#_JWT_SECRET = this.#getEnv("JWT_SECRET");
     this.#_COOKIE_SECRET = this.#getEnv("COOKIE_SECRET");
