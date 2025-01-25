@@ -32,6 +32,8 @@ const updateStatus = async () => {
   }
 };
 
+updateStatus().catch();
+
 document
   .querySelector("form#register")
   .addEventListener("submit", onSubmit(Api.register));
