@@ -31,11 +31,11 @@ button {
 }
 
 #register button {
-  color: red;
+  color: limegreen;
 }
 
 #login button {
-  color: red;
+  color: limegreen;
 }
 
 button#logout {
