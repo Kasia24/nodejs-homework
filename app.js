@@ -2,17 +2,20 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const authRoutes = require("./routes/auth");
-const contactRoutes = require("./routes/contacts");
+const authRoutes = require("./routes/auth"); // Trasy dla uwierzytelniania
+const contactRoutes = require("./routes/contacts"); // Trasy dla kontaktów
+const path = require("path");
 
-dotenv.config();
+dotenv.config(); // Ładowanie zmiennych środowiskowych
+
 const app = express();
 
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(cors()); // Obsługa CORS
+app.use(express.json()); // Obsługa danych JSON w żądaniach
+app.use(express.urlencoded({ extended: true })); // Obsługa danych urlencoded
 
-// Połączenie z bazą danych
+// Połączenie z bazą danych MongoDB
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -24,15 +27,25 @@ mongoose
     process.exit(1);
   });
 
-// Rejestracja tras
-app.use("/api/users", authRoutes); // Endpointy rejestracji, logowania itd.
-app.use("/api/contacts", contactRoutes); // Endpointy dla kontaktów
+// Statyczne pliki (opcjonalne)
+app.use(express.static(path.join(__dirname, "public")));
 
-// Obsługa błędów
-app.use((req, res) => {
+// Obsługa tras
+app.use("/api/users", authRoutes); // Trasy związane z użytkownikami (rejestracja, logowanie itp.)
+app.use("/api/contacts", contactRoutes); // Trasy związane z kontaktami
+
+// Obsługa błędów 404 (trasa nieznaleziona)
+app.use((req, res, next) => {
   res.status(404).json({ message: "Not found" });
 });
 
+// Obsługa błędów serwera
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: "Server error" });
+});
+
+// Uruchomienie serwera
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
