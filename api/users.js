@@ -2,7 +2,7 @@ import { Router } from "express";
 import bcrypt from "bcrypt"; /* Checkout Argon2 */
 import chalk from "chalk";
 import { auth } from "../middlewares/auth.js";
-import { Users, UserRole } from "../models/Users.js";
+import { Users, UserRole } from "../models/user.js";
 import { HttpError } from "../models/HttpError.js";
 import { JWT } from "../lib/jwt.js";
 
