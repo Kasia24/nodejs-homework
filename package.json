@@ -2,11 +2,11 @@
   "name": "template",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "start:dev": "cross-env NODE_ENV=development nodemon ./app.js",
     "lint": "eslint **/*.js",
     "lint:fix": "eslint --fix **/*.js",
-    "start": "node app.js"
+    "start": "dotenvx run -- node index.js"
   },
   "dependencies": {
     "@dotenvx/dotenvx": "^1.33.0",
