@@ -9,40 +9,42 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   </head>
   <body>
-    <div class="form-container">
-      <h2>Rejestracja</h2>
-      <form id="signup-form">
-        <div class="form-group">
-          <label for="email">Adres e-mail</label>
-          <input type="email" id="email" name="email" required />
-        </div>
-        <div class="form-group">
-          <label for="password">Hasło</label>
-          <input type="password" id="password" name="password" required />
-        </div>
-        <div class="form-group">
-          <button type="submit">Zarejestruj się</button>
-        </div>
-        <div class="message" id="signup-message"></div>
-      </form>
-    </div>
+    <header class="top-bar">
+      <h1 id="status">Please login</h1>
 
-    <div class="form-container" style="margin-top: 30px">
-      <h2>Logowanie</h2>
-      <form id="login-form">
-        <div class="form-group">
-          <label for="login-email">Adres e-mail</label>
-          <input type="email" id="login-email" name="email" required />
-        </div>
-        <div class="form-group">
-          <label for="login-password">Hasło</label>
-          <input type="password" id="login-password" name="password" required />
-        </div>
-        <div class="form-group">
-          <button type="submit">Zaloguj się</button>
-        </div>
-        <div class="message" id="login-message"></div>
-      </form>
+      <button type="button" id="logout">Logout</button>
+    </header>
+
+    <main class="column">
+      <section class="column">
+        <form id="register" autocomplete="off">
+          <label>Email:</label>
+          <input type="email" name="email" required value="user@user.com" />
+
+          <label>Password:</label>
+          <input type="password" name="password" required value="user123" />
+
+          <button type="submit">Register</button>
+        </form>
+
+        <form id="login" autocomplete="off">
+          <label>Email:</label>
+          <input type="email" name="email" required value="user@user.com" />
+
+          <label>Password:</label>
+          <input type="password" name="password" required value="user123" />
+
+          <button type="submit">Login</button>
+        </form>
+      </section>
+
+      <section>
+        <h2>Protected resources</h2>
+        <button type="button" id="users">Get All Users</button>
+
+        <button type="button" id="jwts">Generate some JWT</button>
+      </section>
+    </main>
     </div>
     <script type="module" src="./main.js"></script>
   </body>
