@@ -46,7 +46,7 @@ const contactSchema = new mongoose.Schema({
 
 const Contact = mongoose.model("contact", contactSchema);
 
-module.exports = { User, Contact };
+export { User, Contact };
 
 // Add ADMIN role via Database Client tools.
 export const UserRole = Object.freeze({
