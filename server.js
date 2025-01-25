@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const userRoutes = require("./routes/users");
+const userRoutes = require("./routes/auth");
 const contactRoutes = require("./routes/contacts"); // Trasy kontaktów
 const path = require("path");
 
