@@ -2,7 +2,7 @@ import { Router } from "express";
 import bcrypt from "bcrypt"; /* Checkout Argon2 */
 import chalk from "chalk";
 import { auth } from "../middlewares/auth.js";
-import { Users, UserRole } from "../models/user.js";
+import { User, UserRole } from "../models/user.js";
 import { HttpError } from "../models/HttpError.js";
 import { JWT } from "../lib/jwt.js";
 
@@ -26,7 +26,7 @@ const toUserDto = (userEntity) => ({
 
 // Get All Users.
 usersRouter.get("/", auth([UserRole.ADMIN]), async (req, res) => {
-  const users = await Users.find();
+  const users = await User.find();
   return res.json(users.map(toUserDto));
 });
 
@@ -34,14 +34,14 @@ usersRouter.get("/", auth([UserRole.ADMIN]), async (req, res) => {
 usersRouter.post("/", async (req, res, next) => {
   const { email, password } = req.body;
 
-  const userWithEmail = await Users.findOne({ email });
+  const userWithEmail = await User.findOne({ email });
   if (userWithEmail) {
     // return res.status(409).json({ error: "Email already exists" });
     return next(new HttpError(409, "Email already exists"));
   }
 
   const hashedPassword = await hashPassword(password);
-  const user = await Users.create({ email, password: hashedPassword });
+  const user = await User.create({ email, password: hashedPassword });
 
   console.log(chalk.green(`User registered: ${user.email}`));
 
@@ -51,7 +51,7 @@ usersRouter.post("/", async (req, res, next) => {
 // Login.
 usersRouter.post("/me", async (req, res, next) => {
   const { email, password } = req.body;
-  const user = await Users.findOne({ email });
+  const user = await User.findOne({ email });
 
   if (!user) {
     // return res.status(401).json({ error: "Invalid credentials" });
@@ -74,7 +74,7 @@ usersRouter.post("/me", async (req, res, next) => {
 
 // Get Current user.
 usersRouter.get("/me", auth(), async (req, res, next) => {
-  const user = await Users.findById(req?.userId);
+  const user = await User.findById(req?.userId);
 
   if (!user) {
     // return res.sendStatus(403);
@@ -86,7 +86,7 @@ usersRouter.get("/me", auth(), async (req, res, next) => {
 
 // Logout.
 usersRouter.delete("/me", auth(), async (req, res) => {
-  const user = await Users.findById(req?.userId);
+  const user = await User.findById(req?.userId);
   console.log(chalk.green(`User logged out: ${user.email}`));
 
   return res.sendStatus(204);

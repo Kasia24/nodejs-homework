@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
-// Rola użytkownika
+// Role użytkownika
 export const UserRole = Object.freeze({
   ADMIN: "ADMIN",
   USER: "USER",
