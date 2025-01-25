@@ -80,4 +80,4 @@ const UserSchema = new Schema({
   },
 });
 
-export const Users = mongoose.model("user", UserSchema);
+export { User, Contact };
