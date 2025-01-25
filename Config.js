@@ -4,11 +4,13 @@ class Config {
   #_PORT;
   #_MONGODB_URI;
   #_JWT_SECRET;
+  #_COOKIE_SECRET;
 
   constructor() {
-    this.#_PORT = this.#normalizePort(this.#getEnv("PORT", "5000"));
+    this.#_PORT = this.#normalizePort(this.#getEnv("PORT", "3001"));
     this.#_MONGODB_URI = this.#getEnv("MONGODB_URI");
     this.#_JWT_SECRET = this.#getEnv("JWT_SECRET");
+    this.#_COOKIE_SECRET = this.#getEnv("COOKIE_SECRET");
 
     console.log(chalk.magenta("Config loaded."));
   }
@@ -25,12 +27,16 @@ class Config {
     return this.#_JWT_SECRET;
   }
 
+  get COOKIE_SECRET() {
+    return this.#_COOKIE_SECRET;
+  }
+
   #getEnv(name, defaultValue) {
     const value = process.env[name];
 
     if (!value) {
       if (defaultValue) return defaultValue;
-      throw new Error(`Environment variable "${name}" is not set.`);
+      throw new Error(`Environment variable ${name} is not set.`);
     }
 
     return value;
