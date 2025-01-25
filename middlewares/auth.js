@@ -1,29 +1,33 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/user");
+import { JWT } from "../lib/jwt.js";
+import { Users, UserRole } from "../models/user.js";
+import { HttpError } from "../models/HttpError.js";
 
-const authMiddleware = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
+export const auth =
+  (roles = [UserRole.USER, UserRole.ADMIN]) =>
+  async (req, res, next) => {
+    const AuthorizationHeader = req.headers["authorization"];
+    const token = AuthorizationHeader?.replace("Bearer ", "");
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Not authorized" });
-  }
-
-  const token = authHeader.split(" ")[1];
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
-
-    if (!user || user.token !== token) {
-      return res.status(401).json({ message: "Not authorized" });
+    const isTokenValid = await JWT.verify(token);
+    if (!isTokenValid) {
+      // return res.status(401).json({ error: "Invalid token." });
+      return next(new HttpError(401, "Invalid token."));
     }
 
-    req.user = user;
-    next();
-  } catch (err) {
-    res.status(401).json({ message: "Not authorized" });
-  }
-};
+    const tokenData = JWT.decode(token);
+    if (!tokenData?.data?.id) {
+      // return res.status(401).json({ error: "Malformed token." });
+      return next(new HttpError(401, "Malformed token."));
+    }
 
-module.exports = authMiddleware;
-module.exports = authMiddleware;
+    const user = await Users.findById(tokenData?.data?.id);
+
+    if (!user || !roles.includes(user?.role)) {
+      // return res.status(403).json({ error: "Unauthorized." });
+      return next(new HttpError(403, "Unauthorized."));
+    }
+
+    req.userId = user._id;
+
+    next();
+  };

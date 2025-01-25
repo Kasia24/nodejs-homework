@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Contact = require("../models/contact"); // Model kontaktu
+const Contact = require("../models/HttpError"); // Model kontaktu
 
 // GET: Pobierz wszystkie kontakty
 router.get("/", async (req, res) => {

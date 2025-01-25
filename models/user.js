@@ -1,32 +1,26 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
+import mongoose, { Schema } from "mongoose";
 
-const userSchema = new mongoose.Schema({
+// Add ADMIN role via Database Client tools.
+export const UserRole = Object.freeze({
+  ADMIN: "ADMIN",
+  USER: "USER",
+});
+
+const UserSchema = new Schema({
   email: {
     type: String,
-    required: [true, "Email is required"],
+    required: true,
     unique: true,
   },
   password: {
     type: String,
-    required: [true, "Password is required"],
+    required: true,
   },
-  subscription: {
+  role: {
     type: String,
-    enum: ["starter", "pro", "business"],
-    default: "starter",
-  },
-  token: {
-    type: String,
-    default: null,
+    enum: [UserRole.ADMIN, UserRole.USER],
+    default: UserRole.USER,
   },
 });
 
-// Metoda porównująca hasła
-userSchema.methods.comparePassword = async function (password) {
-  return bcrypt.compare(password, this.password);
-};
-
-const User = mongoose.model("User", userSchema);
-
-module.exports = User;
+export const Users = mongoose.model("user", UserSchema);
