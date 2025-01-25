@@ -7,7 +7,7 @@ const log = (msg) => console.log(chalk.cyan(msg));
 
 const bootstrap = async (config) => {
   await mongoose.connect(config.MONGODB_URI);
-  const server = createServer();
+  const server = createServer(config);
 
   const port = config.PORT;
 
