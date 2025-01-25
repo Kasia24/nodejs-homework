@@ -6,12 +6,6 @@ const Client = new HttpClient(`/api/v1`, {
   "Content-Type": "application/json",
 });
 
-/*
-Saving JWT Token in LocalStorage only for demonstrational purposes.
-It is insecure to do so in real world scenario.
-We will use Cookies in the next examples.
-*/
-
 const LOCAL_STORAGE_KEY = "goit-auth-example";
 const saveToken = (data) => {
   Client.setAuthHeader(data.token);
