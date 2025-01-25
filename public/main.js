@@ -1,62 +1,56 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const signupForm = document.getElementById("signup-form");
-  const loginForm = document.getElementById("login-form");
+import { Api } from "./api.js";
 
-  // axios jest teraz dostępne globalnie
+const onSubmit =
+  (callback = async (body) => {}) =>
+  async (event) => {
+    event.preventDefault();
 
-  // Obsługa formularza rejestracji
-  signupForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
+    const form = event.target;
 
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+    const email = form.elements["email"].value;
+    const password = form.elements["password"].value;
 
-    const signupMessage = document.getElementById("signup-message");
-    signupMessage.textContent = ""; // Resetowanie komunikatu
+    const body = { email, password };
 
-    try {
-      const response = await axios.post("/users/signup", {
-        email,
-        password,
-      });
+    console.log(body);
+    await callback(body);
 
-      if (response.status === 201) {
-        signupMessage.textContent = "Rejestracja przebiegła pomyślnie!";
-        signupMessage.classList.add("success-message");
-      } else {
-        signupMessage.textContent = response.data.message;
-      }
-    } catch (error) {
-      signupMessage.textContent = "Wystąpił błąd. Spróbuj ponownie.";
-    }
-  });
+    form.reset();
+  };
 
-  // Obsługa formularza logowania
-  loginForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
+const updateStatus = async () => {
+  const currentUser = await Api.getCurrentUser().catch(() => null);
 
-    const email = document.getElementById("login-email").value;
-    const password = document.getElementById("login-password").value;
+  document.querySelector("#status").textContent =
+    currentUser === null ? "Please login" : `Logged in as ${currentUser.email}`;
+};
 
-    const loginMessage = document.getElementById("login-message");
-    loginMessage.textContent = ""; // Resetowanie komunikatu
+updateStatus().catch();
 
-    try {
-      const response = await axios.post("/users/login", {
-        email,
-        password,
-      });
+document
+  .querySelector("form#register")
+  .addEventListener("submit", onSubmit(Api.register));
 
-      if (response.status === 200) {
-        loginMessage.textContent = "Zalogowano pomyślnie!";
-        loginMessage.classList.add("success-message");
-        // Możesz zapisać token w localStorage lub cookies
-        localStorage.setItem("token", response.data.token);
-      } else {
-        loginMessage.textContent = response.data.message;
-      }
-    } catch (error) {
-      loginMessage.textContent = "Wystąpił błąd. Spróbuj ponownie.";
-    }
-  });
-});
+document.querySelector("form#login").addEventListener(
+  "submit",
+  onSubmit((credentials) => Api.login(credentials).then(updateStatus))
+);
+
+document
+  .querySelector("button#logout")
+  .addEventListener("click", () => Api.logout().then(updateStatus));
+
+document
+  .querySelector("button#users")
+  .addEventListener("click", () => Api.getAllUsers().then(console.log));
+
+document.querySelector("button#jwts").addEventListener("click", () =>
+  Api.generateSomeJwt().then(({ token }) => {
+    const parts = token.split(".");
+    const decoded = parts.slice(0, 2).map((part) => atob(part));
+    const jwt = { token, parts, decoded };
+
+    console.log(jwt);
+    alert(JSON.stringify(jwt, null, 2));
+  })
+);
