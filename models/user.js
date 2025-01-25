@@ -1,6 +1,13 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
+// Rola użytkownika
+export const UserRole = Object.freeze({
+  ADMIN: "ADMIN",
+  USER: "USER",
+});
+
+// Schemat użytkownika
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -10,6 +17,11 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, "Password is required"],
+  },
+  role: {
+    type: String,
+    enum: [UserRole.ADMIN, UserRole.USER],
+    default: UserRole.USER,
   },
   subscription: {
     type: String,
@@ -32,11 +44,24 @@ userSchema.pre("save", async function (next) {
 
 const User = mongoose.model("user", userSchema);
 
+// Schemat kontaktu
 const contactSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  phone: String,
-  favorite: { type: Boolean, default: false },
+  name: {
+    type: String,
+    required: [true, "Name is required"],
+  },
+  email: {
+    type: String,
+    required: [true, "Email is required"],
+  },
+  phone: {
+    type: String,
+    required: [true, "Phone is required"],
+  },
+  favorite: {
+    type: Boolean,
+    default: false,
+  },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "user",
@@ -46,38 +71,5 @@ const contactSchema = new mongoose.Schema({
 
 const Contact = mongoose.model("contact", contactSchema);
 
-export { User, Contact };
-
-// Add ADMIN role via Database Client tools.
-export const UserRole = Object.freeze({
-  ADMIN: "ADMIN",
-  USER: "USER",
-});
-
-const UserSchema = new Schema({
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  role: {
-    type: String,
-    enum: [UserRole.ADMIN, UserRole.USER],
-    default: UserRole.USER,
-  },
-  subscription: {
-    type: String,
-    enum: ["starter", "pro", "business"],
-    default: "starter",
-  },
-  token: {
-    type: String,
-    default: null,
-  },
-});
-
+// Eksport modeli
 export { User, Contact };
