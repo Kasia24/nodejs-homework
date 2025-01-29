@@ -1,79 +1,114 @@
-import { Api } from "./api.js";
+const axios = require("axios");
 
-const onSubmit = (callback) => async (event) => {
-  event.preventDefault();
-  const form = event.target;
-  const email = form.elements["email"].value;
-  const password = form.elements["password"].value;
+const API_URL = "http://localhost:5000"; // Replace with your backend URL
 
-  const body = { email, password };
-  console.log(body);
+// Select the necessary DOM elements
+const registerForm = document.getElementById("register");
+const loginForm = document.getElementById("login");
+const statusElement = document.getElementById("status");
+const logoutButton = document.getElementById("logout");
+const getUsersButton = document.getElementById("users");
+const generateJWTButton = document.getElementById("jwts");
+
+let currentToken = null;
+
+// Function to set the status
+function setStatus(message) {
+  statusElement.textContent = message;
+}
+
+// Function to handle registration
+registerForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const formData = new FormData(registerForm);
+  const data = {
+    email: formData.get("email"),
+    password: formData.get("password"),
+  };
 
   try {
-    await callback(body);
+    const response = await axios.post(`${API_URL}/users/signup`, data);
+    alert("Registration successful!");
   } catch (error) {
-    console.error("Error during submit:", error);
-    alert("An error occurred. Please try again.");
+    alert("Registration failed: " + error.response.data.message);
   }
+});
 
-  form.reset();
-};
+// Function to handle login
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-const updateStatus = async () => {
+  const formData = new FormData(loginForm);
+  const data = {
+    email: formData.get("email"),
+    password: formData.get("password"),
+  };
+
   try {
-    const currentUser = await Api.getCurrentUser();
-    document.querySelector("#status").textContent =
-      currentUser === null
-        ? "Please login"
-        : `Logged in as ${currentUser.email}`;
+    const response = await axios.post(`${API_URL}/users/login`, data);
+    currentToken = response.data.token;
+    setStatus("Logged in successfully");
+    localStorage.setItem("jwt", currentToken); // Store token in local storage
   } catch (error) {
-    console.error("Error fetching current user:", error);
-    document.querySelector("#status").textContent = "Error fetching status";
+    alert("Login failed: " + error.response.data.message);
+  }
+});
+
+// Function to handle logout
+logoutButton.addEventListener("click", () => {
+  localStorage.removeItem("jwt"); // Remove token from local storage
+  currentToken = null;
+  setStatus("Please login");
+});
+
+// Function to fetch users (protected route)
+getUsersButton.addEventListener("click", async () => {
+  if (!currentToken && !localStorage.getItem("jwt")) {
+    alert("Please login first");
+    return;
+  }
+
+  const token = currentToken || localStorage.getItem("jwt");
+  try {
+    const response = await axios.get(`${API_URL}/users`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    alert("Users fetched successfully: " + JSON.stringify(response.data));
+  } catch (error) {
+    alert("Failed to fetch users: " + error.response.data.message);
+  }
+});
+
+// Function to generate JWT (protected route)
+generateJWTButton.addEventListener("click", async () => {
+  if (!currentToken && !localStorage.getItem("jwt")) {
+    alert("Please login first");
+    return;
+  }
+
+  const token = currentToken || localStorage.getItem("jwt");
+  try {
+    const response = await axios.get(`${API_URL}/jwts`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    alert("Generated JWT: " + JSON.stringify(response.data));
+  } catch (error) {
+    alert("Failed to generate JWT: " + error.response.data.message);
+  }
+});
+
+// Check if the user is already logged in (check localStorage for JWT)
+window.onload = () => {
+  const savedToken = localStorage.getItem("jwt");
+  if (savedToken) {
+    currentToken = savedToken;
+    setStatus("Logged in successfully");
+  } else {
+    setStatus("Please login");
   }
 };
-
-updateStatus().catch();
-
-document
-  .querySelector("form#register")
-  .addEventListener("submit", onSubmit(Api.register));
-
-document.querySelector("form#login").addEventListener(
-  "submit",
-  onSubmit((credentials) => Api.login(credentials).then(updateStatus))
-);
-
-document.querySelector("button#logout").addEventListener("click", () => {
-  Api.logout()
-    .then(updateStatus)
-    .catch((error) => {
-      console.error("Error during logout:", error);
-      alert("An error occurred during logout.");
-    });
-});
-
-document.querySelector("button#users").addEventListener("click", () => {
-  Api.getAllUsers()
-    .then((users) => {
-      console.log(users);
-      // Display users in HTML
-      document.querySelector("#user-list").innerHTML = users
-        .map((user) => `<li>${user.email}</li>`)
-        .join("");
-    })
-    .catch((error) => {
-      console.error("Error fetching users:", error);
-      alert("An error occurred while fetching users.");
-    });
-});
-
-document.querySelector("button#jwts").addEventListener("click", () =>
-  Api.generateSomeJwt().then(({ token }) => {
-    const parts = token.split(".");
-    const decoded = parts.slice(0, 2).map((part) => atob(part));
-
-    const jwt = { token, parts, decoded };
-    console.log(jwt);
-    alert(JSON.stringify(jwt, null, 2));
-  })
-);
