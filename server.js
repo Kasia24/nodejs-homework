@@ -1,4 +1,4 @@
-const express = require("express");
+import express from "express";
 const dotenv = require("dotenv");
 const connectDB = require("./db");
 const contactsRouter = require("./routes/api/contacts");
