@@ -7,13 +7,12 @@ const path = require("path");
 dotenv.config();
 connectDB();
 
-// Umożliwiamy dostęp do plików statycznych w folderze 'public'
-app.use(express.static(path.join(__dirname, "public")));
-
 const app = express();
 app.use(express.json());
 
 app.use("/api/contacts", contactsRouter);
+
+app.use(express.static(path.join(__dirname, "public")));
 
 const PORT = process.env.PORT || 5000;
 
