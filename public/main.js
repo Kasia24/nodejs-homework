@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-const API_URL = "http://localhost:5000"; // Replace with your backend URL
+const API_URL = "http://localhost:5500"; // Replace with your backend URL
 
 // Select the necessary DOM elements
 const registerForm = document.getElementById("register");
