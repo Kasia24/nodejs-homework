@@ -1,52 +1,27 @@
 const express = require("express");
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
+const logger = require("morgan");
 const cors = require("cors");
-const authRoutes = require("./routes/auth"); // Trasy dla uwierzytelniania
-const contactRoutes = require("./routes/contacts"); // Trasy dla kontaktów
-const path = require("path");
 
-dotenv.config(); // Ładowanie zmiennych środowiskowych
+const contactsRouter = require("./routes/api/contacts"); // Poprawiona ścieżka importu
 
 const app = express();
 
-// Middleware
-app.use(cors()); // Obsługa CORS
-app.use(express.json()); // Obsługa danych JSON w żądaniach
-app.use(express.urlencoded({ extended: true })); // Obsługa danych urlencoded
+const formatsLogger = app.get("env") === "development" ? "dev" : "short";
 
-// Połączenie z bazą danych MongoDB
-mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => {
-    console.error("Error connecting to MongoDB:", err);
-    process.exit(1);
-  });
+app.use(logger(formatsLogger));
+app.use(cors());
+app.use(express.json());
 
-// Statyczne pliki (opcjonalne)
-app.use(express.static(path.join(__dirname, "public")));
+app.use("/api/contacts", contactsRouter); // Łączenie routa z routerem
 
-// Obsługa tras
-app.use("/api/users", authRoutes); // Trasy związane z użytkownikami (rejestracja, logowanie itp.)
-app.use("/api/contacts", contactRoutes); // Trasy związane z kontaktami
+app.get("/favicon.ico", (req, res) => res.status(204)); // Obsługa favicon
 
-// Obsługa błędów 404 (trasa nieznaleziona)
-app.use((req, res, next) => {
+app.use((req, res) => {
   res.status(404).json({ message: "Not found" });
 });
 
-// Obsługa błędów serwera
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: "Server error" });
+  res.status(500).json({ message: err.message });
 });
 
-// Uruchomienie serwera
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+module.exports = app;
