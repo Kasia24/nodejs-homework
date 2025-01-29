@@ -1,29 +1,18 @@
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const express = require("express");
+const dotenv = require("dotenv");
+const connectDB = require("./db");
+const contactsRouter = require("./routes/api/contacts");
 
-import express from "express";
-import morgan from "morgan";
-import cookieParser from "cookie-parser";
-import { usersRouter } from "./api/users.js";
-import { jwtsRouter } from "./api/jwts.js";
-import { auth } from "./middlewares/auth.js";
-import { errorHandler } from "./middlewares/errorHandler.js";
-import { notesRouter } from "./api/notes.js";
+dotenv.config();
+connectDB();
 
-export const createServer = (config) => {
-  const app = express();
+const app = express();
+app.use(express.json());
 
-  app.use(morgan("dev"));
-  app.use(express.json());
-  app.use(cookieParser(config.COOKIE_SECRET));
-  app.use(express.static(join(__dirname, "public")));
+app.use("/api/contacts", contactsRouter);
 
-  app.use("/api/v1/users", usersRouter);
-  app.use("/api/v1/jwts", auth(), jwtsRouter);
-  app.use("/api/v1/notes", auth(), notesRouter);
+const PORT = process.env.PORT || 5000;
 
-  app.use(errorHandler);
-
-  return app;
-};
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
