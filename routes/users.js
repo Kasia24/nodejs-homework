@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const User = require("../models/user");
-const authMiddleware = require("../middlewares/auth");
+const auth = require("../middlewares/auth");
 
 const router = express.Router();
 
@@ -81,7 +81,7 @@ router.post("/login", async (req, res) => {
 });
 
 // Wylogowanie użytkownika
-router.get("/logout", authMiddleware, async (req, res) => {
+router.get("/logout", auth, async (req, res) => {
   try {
     req.user.token = null;
     await req.user.save();
@@ -92,7 +92,7 @@ router.get("/logout", authMiddleware, async (req, res) => {
 });
 
 // Obecny użytkownik
-router.get("/current", authMiddleware, (req, res) => {
+router.get("/current", auth, (req, res) => {
   const { email, subscription } = req.user;
   res.status(200).json({ email, subscription });
 });
