@@ -1,4 +1,4 @@
-const axios = require("axios");
+import axios from "./axios.min.js";
 
 const API_URL = "http://localhost:5000"; // Replace with your backend URL
 
