@@ -97,4 +97,20 @@ router.get("/current", auth, (req, res) => {
   res.status(200).json({ email, subscription });
 });
 
+// Aktualizacja subskrypcji użytkownika
+router.patch("/", auth, async (req, res) => {
+  const { subscription } = req.body;
+
+  if (!["starter", "pro", "business"].includes(subscription)) {
+    return res.status(400).json({ message: "Invalid subscription value" });
+  }
+
+  try {
+    req.user.subscription = subscription;
+    await req.user.save();
+    res.status(200).json({ subscription: req.user.subscription });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
 module.exports = router;
