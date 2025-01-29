@@ -1,37 +1,29 @@
-import { JWT } from "../lib/jwt.js";
-import { User, UserRole } from "../models/user.js";
-import { HttpError } from "../models/HttpError.js";
+import jwt from "jsonwebtoken";
+import User from "../models/user.js";
 
-export const auth =
-  (roles = [UserRole.USER, UserRole.ADMIN]) =>
-  async (req, res, next) => {
-    /* Auth Header */
-    // const authtoken = req.headers["authorization"];
-    /* Auth Cookie */
-    const authtoken = req.cookies["authorization"];
+const SECRET_KEY = process.env.SECRET_KEY;
 
-    const token = authtoken?.replace("Bearer ", "");
+const auth = async (req, res, next) => {
+  const { authorization = "" } = req.headers;
+  const token = authorization.replace("Bearer ", "");
 
-    const isTokenValid = await JWT.verify(token);
-    if (!isTokenValid) {
-      // return res.status(401).json({ error: "Invalid token." });
-      return next(new HttpError(401, "Invalid token."));
+  if (!token) {
+    return res.status(401).json({ message: "Not authorized" });
+  }
+
+  try {
+    const { id } = jwt.verify(token, SECRET_KEY);
+    const user = await User.findById(id);
+
+    if (!user || user.token !== token) {
+      return res.status(401).json({ message: "Not authorized" });
     }
 
-    const tokenData = JWT.decode(token);
-    if (!tokenData?.data) {
-      // return res.status(401).json({ error: "Malformed token." });
-      return next(new HttpError(401, "Malformed token."));
-    }
-
-    const user = await User.findById(tokenData?.data?.id);
-
-    if (!user || !roles.includes(user?.role)) {
-      // return res.status(403).json({ error: "Unauthorized." });
-      return next(new HttpError(403, "Unauthorized."));
-    }
-
-    req.userId = user._id;
-
+    req.user = user;
     next();
-  };
+  } catch (error) {
+    return res.status(401).json({ message: "Not authorized" });
+  }
+};
+
+export default auth;
