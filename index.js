@@ -1,7 +1,7 @@
-import mongoose from "mongoose";
-import chalk from "chalk";
-import { createServer } from "./server.js";
-import { config } from "./Config.js";
+const mongoose = require("mongoose");
+const chalk = require("chalk");
+const { createServer } = require("./server.js");
+const { config } = require("./Config.js");
 
 const log = (msg) => console.log(chalk.cyan(msg));
 

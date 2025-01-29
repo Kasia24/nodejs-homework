@@ -1,5 +1,5 @@
-import jwt from "jsonwebtoken";
-import User from "../models/user.js";
+const jwt = require("jsonwebtoken");
+const User = require("../models/user.js");
 
 const SECRET_KEY = process.env.SECRET_KEY;
 

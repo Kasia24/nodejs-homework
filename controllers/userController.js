@@ -1,7 +1,7 @@
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import User from "../models/user.js";
-import Joi from "joi";
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const User = require("../models/user.js");
+const Joi = require("joi");
 
 const SECRET_KEY = process.env.SECRET_KEY;
 

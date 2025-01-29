@@ -1,5 +1,5 @@
-import chalk from "chalk";
-import { HttpError } from "../models/HttpError.js";
+const chalk = require("chalk");
+const { HttpError } = require("../models/HttpError.js");
 
 export const errorHandler = (error, req, res, next) => {
   console.error(chalk.red(error));
