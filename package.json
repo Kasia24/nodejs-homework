@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint **/*.js",
     "lint:fix": "eslint --fix **/*.js",
-    "start": "dotenvx run -- node index.js"
+    "start": "dotenvx run -- node server.js"
   },
   "dependencies": {
     "@dotenvx/dotenvx": "^1.33.0",
