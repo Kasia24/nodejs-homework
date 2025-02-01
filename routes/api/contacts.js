@@ -51,8 +51,21 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ message: error.details[0].message });
   }
 
+  // Generowanie URL do awatara z Gravatar
+  const avatarURL = gravatar.url(email, {
+    s: "200", // Rozmiar awatara (200px)
+    r: "pg", // Jakość (PG - "Parental Guidance")
+    d: "mm", // Domyślny obrazek (w razie braku awatara)
+  });
+
   try {
-    const newContact = await Contact.create({ name, email, phone, favorite }); // Tworzenie nowego kontaktu
+    const newContact = await Contact.create({
+      name,
+      email,
+      phone,
+      favorite,
+      avatarURL, // Zapisujemy URL awatara w bazie danych
+    }); // Tworzenie nowego kontaktu
     res.status(201).json(newContact);
   } catch (error) {
     res.status(500).json({ message: error.message });
