@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./db");
 const contactsRouter = require("./routes/api/contacts");
 const path = require("path");
-const usersRouter = require("./routes/users");
+const usersRouter = require("./routes/api/users");
 
 dotenv.config();
 connectDB();
