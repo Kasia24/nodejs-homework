@@ -2,11 +2,17 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
-const User = require("../../models/user");
-const auth = require("../../middlewares/auth");
+const fs = require("fs").promises;
+const path = require("path");
+const Jimp = require("jimp");
 const gravatar = require("gravatar");
 
+const User = require("../../models/user");
+const auth = require("../../middlewares/auth");
+const upload = require("../../middlewares/upload");
+
 const router = express.Router();
+const avatarsDir = path.join(__dirname, "../../public/avatars");
 
 // Walidacja rejestracji i logowania
 const signupSchema = Joi.object({
@@ -19,7 +25,7 @@ const loginSchema = Joi.object({
   password: Joi.string().required(),
 });
 
-// Rejestracja użytkownika
+// 🔹 Rejestracja użytkownika
 router.post("/signup", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -55,7 +61,36 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-// Logowanie użytkownika
+// 🔹 Aktualizacja awatara użytkownika
+router.patch("/avatars", auth, upload.single("avatar"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
+
+  const { path: tmpPath, filename } = req.file;
+  const newAvatarName = `${req.user._id}-${Date.now()}.jpg`;
+  const newAvatarPath = path.join(avatarsDir, newAvatarName);
+
+  try {
+    // 🔸 Przetwarzanie obrazu za pomocą Jimp
+    const image = await Jimp.read(tmpPath);
+    await image.resize(250, 250).writeAsync(newAvatarPath);
+
+    // 🔸 Usunięcie pliku z tmp
+    await fs.unlink(tmpPath);
+
+    // 🔸 Aktualizacja użytkownika w bazie danych
+    const avatarURL = `/avatars/${newAvatarName}`;
+    await User.findByIdAndUpdate(req.user._id, { avatarURL }, { new: true });
+
+    res.status(200).json({ avatarURL });
+  } catch (error) {
+    console.error("Error processing avatar:", error);
+    res.status(500).json({ message: "Error processing avatar" });
+  }
+});
+
+// 🔹 Logowanie użytkownika
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -84,14 +119,18 @@ router.post("/login", async (req, res) => {
 
     res.status(200).json({
       token,
-      user: { email: user.email, subscription: user.subscription },
+      user: {
+        email: user.email,
+        subscription: user.subscription,
+        avatarURL: user.avatarURL,
+      },
     });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// Wylogowanie użytkownika
+// 🔹 Wylogowanie użytkownika
 router.get("/logout", auth, async (req, res) => {
   try {
     req.user.token = null;
@@ -102,13 +141,13 @@ router.get("/logout", auth, async (req, res) => {
   }
 });
 
-// Obecny użytkownik
+// 🔹 Obecny użytkownik
 router.get("/current", auth, (req, res) => {
-  const { email, subscription } = req.user;
-  res.status(200).json({ email, subscription });
+  const { email, subscription, avatarURL } = req.user;
+  res.status(200).json({ email, subscription, avatarURL });
 });
 
-// Aktualizacja subskrypcji użytkownika
+// 🔹 Aktualizacja subskrypcji użytkownika
 router.patch("/", auth, async (req, res) => {
   const { subscription } = req.body;
 
@@ -124,4 +163,5 @@ router.patch("/", auth, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 module.exports = router;

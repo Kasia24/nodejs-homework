@@ -16,6 +16,8 @@ app.use("/api/users", usersRouter);
 
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use("/avatars", express.static("public/avatars"));
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
