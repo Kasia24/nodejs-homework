@@ -1,56 +1,46 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
-const Joi = require("joi");
 const gravatar = require("gravatar");
-const User = require("../models/user"); // Model użytkownika
+const User = require("../models/user");
 
 const router = express.Router();
 
-// Walidacja rejestracji
-const signupSchema = Joi.object({
-  email: Joi.string().email().required(),
-  password: Joi.string().min(6).required(),
-});
-
 // Rejestracja użytkownika
 router.post("/", async (req, res) => {
+  const { email, password } = req.body;
+
   try {
-    const { email, password } = req.body;
-
-    // Walidacja danych wejściowych
-    const { error } = signupSchema.validate(req.body);
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
+    // Sprawdzamy, czy użytkownik już istnieje
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ message: "Email already exists" });
     }
 
-    // Sprawdzanie, czy użytkownik o danym emailu już istnieje
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(409).json({ message: "Email in use" });
-    }
+    // Generowanie URL do awatara z Gravatar
+    const avatarURL = gravatar.url(email, {
+      s: "200", // Rozmiar awatara
+      r: "pg", // Jakość awatara
+      d: "mm", // Domyślny awatar
+    });
 
-    // Generowanie URL do awatara z Gravatar na podstawie emaila
-    const avatarURL = gravatar.url(email, { s: "200", r: "pg", d: "mm" });
-
-    // Haszowanie hasła przed zapisaniem w bazie
+    // Szyfrowanie hasła
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Tworzenie nowego użytkownika z awatarem
-    const newUser = await User.create({
+    // Tworzymy nowego użytkownika
+    const newUser = new User({
       email,
       password: hashedPassword,
-      avatarURL, // Zapisanie avatarURL w bazie danych
+      avatarURL, // Przechowujemy URL awatara
     });
 
-    // Zwrócenie odpowiedzi z danymi użytkownika
+    // Zapisujemy użytkownika do bazy danych
+    await newUser.save();
+
     res.status(201).json({
-      user: {
-        email: newUser.email,
-        subscription: newUser.subscription,
-        avatarURL: newUser.avatarURL,
-      },
+      message: "User created successfully",
+      avatarURL: newUser.avatarURL, // Zwracamy URL awatara
     });
-  } catch (err) {
+  } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
 });

@@ -19,6 +19,7 @@ const contactSchema = new mongoose.Schema({
   },
   avatarURL: {
     type: String, // Nowe pole do przechowywania URL awatara
+    default: "", // Domyślnie puste, jeśli nie zostanie ustawione
   },
 });
 
