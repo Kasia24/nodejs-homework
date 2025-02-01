@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const User = require("../../models/user");
 const auth = require("../../middlewares/auth");
+const gravatar = require("gravatar");
 
 const router = express.Router();
 
@@ -34,10 +35,20 @@ router.post("/signup", async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ email, password: hashedPassword });
+    const avatarURL = gravatar.url(email, { s: "250", d: "retro" }, true); // Domyślny awatar
+
+    const newUser = await User.create({
+      email,
+      password: hashedPassword,
+      avatarURL,
+    });
 
     res.status(201).json({
-      user: { email: newUser.email, subscription: newUser.subscription },
+      user: {
+        email: newUser.email,
+        subscription: newUser.subscription,
+        avatarURL: newUser.avatarURL,
+      },
     });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
