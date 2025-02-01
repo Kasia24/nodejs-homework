@@ -1,32 +1,40 @@
+require("dotenv").config(); // Załadowanie zmiennych środowiskowych z pliku .env
 const express = require("express");
 const mongoose = require("mongoose");
 const multer = require("multer");
 const path = require("path");
+const jimp = require("jimp");
+const jwt = require("jsonwebtoken");
+const expressJwt = require("express-jwt");
 
 const app = express();
-const PORT = 5000;
+const PORT = 3000;
 
-// Połączenie z MongoDB
-mongoose.connect("mongodb://localhost:27017/contactsDB", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+// Połączenie z MongoDB za pomocą zmiennej MONGO_URI
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("Połączono z MongoDB");
+  })
+  .catch((err) => {
+    console.error("Błąd połączenia z MongoDB:", err);
+  });
 
-// Model kontaktu
-const ContactSchema = new mongoose.Schema({
+// Model użytkownika
+const UserSchema = new mongoose.Schema({
   name: String,
   email: String,
-  avatar: String, // Ścieżka do awatara
+  avatarURL: String, // Ścieżka do awatara
 });
 
-const Contact = mongoose.model("Contact", ContactSchema);
+const User = mongoose.model("User", UserSchema);
 
-// Ustawienie folderu publicznego do serwowania plików statycznych
-app.use(express.static("public"));
-
-// Konfiguracja Multera (przechowywanie plików w "public/avatars")
+// Ustawienia Multera
 const storage = multer.diskStorage({
-  destination: "public/avatars",
+  destination: "tmp", // Pliki będą przechowywane tymczasowo w folderze tmp
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
   },
@@ -34,26 +42,62 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Endpoint do przesyłania awatarów
-app.post("/upload-avatar", upload.single("avatar"), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: "Brak pliku do przesłania" });
-  }
-
-  // Możesz tutaj dodać aktualizację użytkownika w bazie danych
-  const newContact = new Contact({
-    name: req.body.name,
-    email: req.body.email,
-    avatar: `/avatars/${req.file.filename}`,
-  });
-
-  await newContact.save();
-
-  res.json({
-    message: "Awatar przesłany!",
-    avatarUrl: `/avatars/${req.file.filename}`,
-  });
+// Middleware do autentykacji
+const authenticateJWT = expressJwt({
+  secret: "your-secret-key",
+  algorithms: ["HS256"],
 });
+
+// Endpoint aktualizacji awatara
+app.patch(
+  "/users/avatars",
+  authenticateJWT,
+  upload.single("avatar"),
+  async (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ message: "Brak pliku do przesłania" });
+    }
+
+    try {
+      // Przetworzenie obrazu za pomocą Jimp (zmiana rozmiaru na 250x250)
+      const image = await jimp.read(req.file.path);
+      await image.resize(250, 250); // Zmiana rozmiaru
+
+      // Zapisz obraz w folderze 'public/avatars' z unikalną nazwą
+      const avatarFileName = Date.now() + ".png";
+      const avatarPath = path.join(
+        __dirname,
+        "public",
+        "avatars",
+        avatarFileName
+      );
+      await image.writeAsync(avatarPath);
+
+      // Znajdź użytkownika w bazie danych na podstawie tokenu
+      const user = await User.findOne({ email: req.user.email });
+
+      if (!user) {
+        return res.status(404).json({ message: "Użytkownik nie znaleziony" });
+      }
+
+      // Zaktualizuj URL awatara w bazie danych
+      user.avatarURL = `/avatars/${avatarFileName}`;
+      await user.save();
+
+      // Odpowiedź z nowym URL awatara
+      res.status(200).json({
+        avatarURL: user.avatarURL,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Coś poszło nie tak" });
+    }
+  }
+);
+
+// Ustawienia Express
+app.use(express.static("public"));
+app.use(express.json());
 
 // Start serwera
 app.listen(PORT, () => {

@@ -3,10 +3,9 @@ const gravatar = require("gravatar");
 
 const contactSchema = new mongoose.Schema(
   {
-    name: { type: String },
+    name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    phone: { type: String },
+    phone: { type: String, required: true, unique: true },
     favorite: { type: Boolean, default: false },
     avatarURL: {
       type: String,
