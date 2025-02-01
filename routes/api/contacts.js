@@ -1,140 +1,136 @@
 const express = require("express");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const Joi = require("joi");
-const Contact = require("..//../models/contacts"); // Model Mongoose
 const gravatar = require("gravatar");
+const User = require("../models/user");
+const auth = require("../middlewares/auth");
 
 const router = express.Router();
 
-// Schemat walidacji dla kontaktu
-const contactSchema = Joi.object({
-  name: Joi.string().min(3).max(30).required(),
+// Walidacja rejestracji i logowania
+const signupSchema = Joi.object({
   email: Joi.string().email().required(),
-  phone: Joi.string()
-    .pattern(/^\(\d{3}\) \d{3}-\d{4}$/)
-    .required(),
-  favorite: Joi.boolean(),
+  password: Joi.string().min(6).required(),
 });
 
-// Trasa GET /api/contacts - Pobierz wszystkie kontakty
-router.get("/", async (req, res) => {
-  try {
-    const contacts = await Contact.find(); // Pobieranie wszystkich kontaktów z MongoDB
-    console.log("Kontakty z bazy danych:", contacts); // Sprawdź, czy zwraca dane
-    res.json(contacts);
-  } catch (error) {
-    console.error("Błąd przy pobieraniu kontaktów:", error);
-    res.status(500).json({ message: error.message });
-  }
+const loginSchema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().required(),
 });
 
-// Trasa GET /api/contacts/:contactId - Pobierz kontakt po ID
-router.get("/:contactId", async (req, res) => {
-  const { contactId } = req.params;
-  try {
-    const contact = await Contact.findById(contactId); // Pobieranie kontaktu po ID
-    if (!contact) {
-      return res.status(404).json({ message: "Kontakt nie został znaleziony" });
-    }
-    res.json(contact);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// Trasa POST /api/contacts - Dodaj nowy kontakt
+// Rejestracja użytkownika
 router.post("/", async (req, res) => {
-  const { name, email, phone, favorite } = req.body;
-
-  // Walidacja danych wejściowych
-  const { error } = contactSchema.validate({ name, email, phone, favorite });
-  if (error) {
-    return res.status(400).json({ message: error.details[0].message });
-  }
-
-  // Generowanie URL do awatara z Gravatar
-  const avatarURL = gravatar.url(email, {
-    s: "200", // Rozmiar awatara (200px)
-    r: "pg", // Jakość (PG - "Parental Guidance")
-    d: "mm", // Domyślny obrazek (w razie braku awatara)
-  });
-
   try {
-    const newContact = await Contact.create({
-      name,
+    const { email, password } = req.body;
+
+    const { error } = signupSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ message: "Email in use" });
+    }
+
+    // Generowanie URL do awatara z Gravatar
+    const avatarURL = gravatar.url(email, {
+      s: "200", // Rozmiar awatara (200px)
+      r: "pg", // Jakość (PG - "Parental Guidance")
+      d: "mm", // Domyślny obrazek (w razie braku awatara)
+    });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await User.create({
       email,
-      phone,
-      favorite,
+      password: hashedPassword,
       avatarURL, // Zapisujemy URL awatara w bazie danych
-    }); // Tworzenie nowego kontaktu
-    res.status(201).json(newContact);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    });
+
+    res.status(201).json({
+      user: {
+        email: newUser.email,
+        subscription: newUser.subscription,
+        avatarURL: newUser.avatarURL,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-// Trasa DELETE /api/contacts/:contactId - Usuń kontakt
-router.delete("/:contactId", async (req, res) => {
-  const { contactId } = req.params;
+// Logowanie użytkownika
+router.post("/login", async (req, res) => {
   try {
-    const deletedContact = await Contact.findByIdAndDelete(contactId); // Usuwanie kontaktu po ID
-    if (!deletedContact) {
-      return res.status(404).json({ message: "Kontakt nie został znaleziony" });
+    const { email, password } = req.body;
+
+    const { error } = loginSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
     }
-    res.status(204).end();
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: "Email or password is wrong" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Email or password is wrong" });
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    user.token = token;
+    await user.save();
+
+    res.status(200).json({
+      token,
+      user: {
+        email: user.email,
+        subscription: user.subscription,
+        avatarURL: user.avatarURL,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-// Trasa PUT /api/contacts/:contactId - Aktualizuj kontakt
-router.put("/:contactId", async (req, res) => {
-  const { contactId } = req.params;
-  const { name, email, phone, favorite } = req.body;
-
-  // Walidacja danych wejściowych
-  const { error } = contactSchema.validate({ name, email, phone, favorite });
-  if (error) {
-    return res.status(400).json({ message: error.details[0].message });
-  }
-
+// Wylogowanie użytkownika
+router.get("/logout", auth, async (req, res) => {
   try {
-    const updatedContact = await Contact.findByIdAndUpdate(
-      contactId,
-      { name, email, phone, favorite },
-      { new: true } // Opcja `new: true` zwraca zaktualizowany dokument
-    );
-
-    if (!updatedContact) {
-      return res.status(404).json({ message: "Kontakt nie został znaleziony" });
-    }
-    res.json(updatedContact);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    req.user.token = null;
+    await req.user.save();
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-// Trasa PATCH /api/contacts/:contactId/favorite - Aktualizuj status ulubionego kontaktu
-router.patch("/:contactId/favorite", async (req, res) => {
-  const { contactId } = req.params;
-  const { favorite } = req.body;
+// Obecny użytkownik
+router.get("/current", auth, (req, res) => {
+  const { email, subscription, avatarURL } = req.user;
+  res.status(200).json({ email, subscription, avatarURL });
+});
 
-  if (favorite === undefined) {
-    return res.status(400).json({ message: "missing field favorite" });
+// Aktualizacja subskrypcji użytkownika
+router.patch("/", auth, async (req, res) => {
+  const { subscription } = req.body;
+
+  if (!["starter", "pro", "business"].includes(subscription)) {
+    return res.status(400).json({ message: "Invalid subscription value" });
   }
 
   try {
-    const updatedContact = await Contact.findByIdAndUpdate(
-      contactId,
-      { favorite },
-      { new: true }
-    );
-
-    if (!updatedContact) {
-      return res.status(404).json({ message: "Kontakt nie został znaleziony" });
-    }
-    res.json(updatedContact);
+    req.user.subscription = subscription;
+    await req.user.save();
+    res.status(200).json({ subscription: req.user.subscription });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Server error" });
   }
 });
 
