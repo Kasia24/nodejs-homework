@@ -6,7 +6,6 @@ const usersRouter = require("./routes/users");
 const path = require("path");
 const multer = require("multer");
 const fs = require("fs");
-const gravatar = require("gravatar");
 const jimp = require("jimp");
 const User = require("./models/user");
 const authMiddleware = require("./middleware/auth");
