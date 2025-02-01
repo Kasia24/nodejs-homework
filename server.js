@@ -5,10 +5,10 @@ const multer = require("multer");
 const path = require("path");
 const jimp = require("jimp");
 const jwt = require("jsonwebtoken");
-const expressJwt = require("express-jwt");
+const { expressjwt: expressJwt } = require("express-jwt");
 
 const app = express();
-const PORT = 3000;
+const PORT = 5000;
 
 // Połączenie z MongoDB za pomocą zmiennej MONGO_URI
 mongoose
@@ -44,7 +44,7 @@ const upload = multer({ storage });
 
 // Middleware do autentykacji
 const authenticateJWT = expressJwt({
-  secret: "JWT_SECRET",
+  secret: process.env.JWT_SECRET, // Użycie sekretu z pliku .env
   algorithms: ["HS256"],
 });
 
