@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const gravatar = require("gravatar");
 
 const userSchema = new mongoose.Schema(
   {
@@ -21,20 +20,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
-    avatarURL: {
-      type: String,
-      default: function () {
-        return gravatar.url(
-          this.email,
-          { s: "200", r: "pg", d: "identicon" },
-          true
-        );
-      },
-    },
   },
   { timestamps: true }
 );
 
-const User = mongoose.models.User || mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;
