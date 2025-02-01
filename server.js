@@ -44,7 +44,7 @@ const upload = multer({ storage });
 
 // Middleware do autentykacji
 const authenticateJWT = expressJwt({
-  secret: "your-secret-key",
+  secret: "JWT_SECRET",
   algorithms: ["HS256"],
 });
 
