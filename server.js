@@ -4,11 +4,13 @@ const mongoose = require("mongoose");
 const multer = require("multer");
 const path = require("path");
 const jimp = require("jimp");
-const jwt = require("jsonwebtoken");
 const { expressjwt: expressJwt } = require("express-jwt");
+const usersRouter = require("./routes/users");
 
 const app = express();
 const PORT = 5000;
+app.use(express.json());
+app.use("/api/users", usersRouter);
 
 // Połączenie z MongoDB za pomocą zmiennej MONGO_URI
 mongoose
@@ -103,3 +105,5 @@ app.use(express.json());
 app.listen(PORT, () => {
   console.log(`Serwer działa na http://localhost:${PORT}`);
 });
+
+module.exports = app;

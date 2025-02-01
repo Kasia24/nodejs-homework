@@ -6,7 +6,8 @@
     "lint": "eslint **/*.js",
     "lint:fix": "eslint --fix **/*.js",
     "start": "cross-env NODE_ENV=production node ./server.js",
-    "start:dev": "cross-env NODE_ENV=development nodemon ./server.js"
+    "start:dev": "cross-env NODE_ENV=development nodemon ./server.js",
+    "test": "jest --detectOpenHandles --forceExit"
   },
   "dependencies": {
     "@dotenvx/dotenvx": "^1.33.0",
