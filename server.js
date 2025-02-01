@@ -1,4 +1,4 @@
-require("dotenv").config(); // Załadowanie zmiennych środowiskowych z pliku .env
+const dotenv = require("dotenv");
 const express = require("express");
 const mongoose = require("mongoose");
 const multer = require("multer");
@@ -6,6 +6,8 @@ const path = require("path");
 const jimp = require("jimp");
 const { expressjwt: expressJwt } = require("express-jwt");
 const usersRouter = require("./routes/users");
+
+dotenv.config();
 
 const app = express();
 const PORT = 5000;
