@@ -1,7 +1,11 @@
-const Contact = require("../../models/contacts");
-const Joi = require("joi");
+const express = require("express");
 const gravatar = require("gravatar");
+const Contact = require("../models/contact");
+const Joi = require("joi");
 
+const router = express.Router(); // Tutaj tworzysz router
+
+// Walidacja kontaktu
 const contactSchema = Joi.object({
   name: Joi.string().min(3).max(30).required(),
   email: Joi.string().email().required(),
@@ -11,6 +15,7 @@ const contactSchema = Joi.object({
   favorite: Joi.boolean(),
 });
 
+// Endpoint dodania kontaktu
 router.post("/contacts", async (req, res) => {
   const { name, email, phone, favorite } = req.body;
 
@@ -20,9 +25,9 @@ router.post("/contacts", async (req, res) => {
     return res.status(400).json({ message: error.details[0].message });
   }
 
-  // Generowanie URL awatara
+  // Generowanie URL do awatara z Gravatar
   const avatarURL = gravatar.url(email, {
-    s: "200", // Rozmiar awatara (200px)
+    s: "200", // Rozmiar awatara
     r: "pg", // Jakość
     d: "mm", // Domyślny obrazek
   });
@@ -40,3 +45,5 @@ router.post("/contacts", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+module.exports = router; // Eksportujesz router, aby móc używać go w innych plikach
