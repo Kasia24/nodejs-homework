@@ -1,6 +1,7 @@
 const express = require("express");
 const Joi = require("joi");
 const Contact = require("..//../models/contacts"); // Model Mongoose
+const gravatar = require("gravatar");
 
 const router = express.Router();
 
