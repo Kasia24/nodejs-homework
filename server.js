@@ -5,14 +5,11 @@ const multer = require("multer");
 const path = require("path");
 const jimp = require("jimp");
 const { expressjwt: expressJwt } = require("express-jwt");
-const usersRouter = require("./routes/users");
 
 dotenv.config();
 
 const app = express();
 const PORT = 5000;
-app.use(express.json());
-app.use("/api/users", usersRouter);
 
 // Połączenie z MongoDB za pomocą zmiennej MONGO_URI
 mongoose
