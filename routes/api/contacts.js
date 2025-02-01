@@ -32,6 +32,7 @@ router.post("/", auth, async (req, res) => {
     r: "pg", // Jakość (PG - "Parental Guidance")
     d: "mm", // Domyślny obrazek (Mystery Man)
   });
+  console.log("Gravatar URL:", avatarURL);
 
   try {
     const newContact = await Contact.create({
