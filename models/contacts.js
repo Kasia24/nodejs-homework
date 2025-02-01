@@ -6,6 +6,7 @@ const contactSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     phone: { type: String, required: true, unique: true },
     favorite: { type: Boolean, default: false },
+    avatarURL: { type: String, default: "" }, // Dodajemy pole avatarURL
     token: {
       type: String,
       default: null,
