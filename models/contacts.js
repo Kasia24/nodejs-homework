@@ -2,9 +2,10 @@ const mongoose = require("mongoose");
 
 const contactSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
+    name: { type: String },
     email: { type: String, required: true, unique: true },
-    phone: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    phone: { type: String },
     favorite: { type: Boolean, default: false },
     avatarURL: { type: String, default: "" }, // Nowe pole do przechowywania awatara
     owner: {
