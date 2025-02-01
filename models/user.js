@@ -1,26 +1,28 @@
 const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema({
+const contactSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
   email: {
     type: String,
     required: true,
-    unique: true,
   },
-  password: {
+  phone: {
     type: String,
     required: true,
   },
-  subscription: {
-    type: String,
-    enum: ["starter", "pro", "business"],
-    default: "starter",
+  favorite: {
+    type: Boolean,
+    default: false,
   },
   avatarURL: {
-    type: String, // Nowe pole do przechowywania URL do awatara
-    default: "", // Domyślnie puste, jeśli nie zostanie ustawione
+    type: String, // Nowe pole do przechowywania URL awatara
+    default: "", // Ustawiamy domyślną wartość jako pusty string
   },
 });
 
-const User = mongoose.model("User", userSchema);
+const Contact = mongoose.model("Contact", contactSchema);
 
-module.exports = User;
+module.exports = Contact;
