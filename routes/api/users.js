@@ -67,7 +67,7 @@ router.patch("/avatars", auth, upload.single("avatar"), async (req, res) => {
     return res.status(400).json({ message: "No file uploaded" });
   }
 
-  const { path: tmpPath, filename } = req.file;
+  const { path: tmpPath } = req.file;
   const newAvatarName = `${req.user._id}-${Date.now()}.jpg`;
   const newAvatarPath = path.join(avatarsDir, newAvatarName);
 
