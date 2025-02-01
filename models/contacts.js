@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const gravatar = require("gravatar");
 
 const contactSchema = new mongoose.Schema(
   {
@@ -13,6 +14,17 @@ const contactSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+contactSchema.pre("save", function (next) {
+  if (this.isNew || this.isModified("email")) {
+    const avatar = gravatar.url(this.email, {
+      s: "200", // Rozmiar awatara
+      r: "pg", // Jakość (pg = rysunki)
+      d: "identicon", // Domyślny awatar (jeśli użytkownik nie ma Gravatar)
+    });
+    this.avatarURL = avatar;
+  }
+  next();
+});
 
 const Contact = mongoose.model("Contact", contactSchema);
 module.exports = Contact;
