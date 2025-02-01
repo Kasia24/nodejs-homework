@@ -8,7 +8,7 @@ const multer = require("multer");
 const fs = require("fs");
 const jimp = require("jimp");
 const User = require("./models/user");
-const authMiddleware = require("./middleware/auth");
+const auth = require("./middlewares/auth");
 
 dotenv.config();
 connectDB();
@@ -30,7 +30,7 @@ const upload = multer({ storage });
 // Endpoint do aktualizacji awatara
 app.patch(
   "/api/users/avatars",
-  authMiddleware,
+  auth,
   upload.single("avatar"),
   async (req, res) => {
     try {
