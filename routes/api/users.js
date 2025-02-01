@@ -110,10 +110,12 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Email or password is wrong" });
     }
 
+    // Generowanie tokena JWT
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
 
+    // Przypisanie tokena do użytkownika
     user.token = token;
     await user.save();
 
