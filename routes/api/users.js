@@ -46,6 +46,8 @@ router.post("/signup", async (req, res) => {
     const avatarURL = gravatar.url(email, { s: "250", d: "retro" }, true);
     const verificationToken = nanoid();
 
+    console.log("Generated verification token:", verificationToken);
+
     const newUser = await User.create({
       email,
       password: hashedPassword,
