@@ -16,6 +16,17 @@ const { sendVerificationEmail } = require("../../services/emailService");
 const router = express.Router();
 const avatarsDir = path.join(__dirname, "../../public/avatars");
 
+// Walidacja rejestracji i logowania
+const signupSchema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().min(6).required(),
+});
+
+const loginSchema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().required(),
+});
+
 // 🔹 Rejestracja użytkownika z weryfikacją e-mail
 router.post("/signup", async (req, res) => {
   try {
