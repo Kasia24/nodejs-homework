@@ -6,7 +6,8 @@ const fs = require("fs").promises;
 const path = require("path");
 const Jimp = require("jimp");
 const gravatar = require("gravatar");
-const { nanoid } = require("nanoid");
+import { nanoid } from "nanoid";
+
 const User = require("../../models/user");
 const auth = require("../../middlewares/auth");
 const upload = require("../../middlewares/upload");
