@@ -61,7 +61,6 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-// 🔹 Aktualizacja awatara użytkownika
 router.patch("/avatars", auth, upload.single("avatar"), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: "No file uploaded" });
@@ -72,16 +71,27 @@ router.patch("/avatars", auth, upload.single("avatar"), async (req, res) => {
   const newAvatarPath = path.join(avatarsDir, newAvatarName);
 
   try {
-    // 🔸 Przetwarzanie obrazu za pomocą Jimp
+    console.log("Checking file existence:", tmpPath);
+    if (!fs.existsSync(tmpPath)) {
+      return res.status(400).json({ message: "Temporary file not found" });
+    }
+
+    console.log("Reading image with Jimp...");
     const image = await Jimp.read(tmpPath);
     await image.resize(250, 250).writeAsync(newAvatarPath);
+    console.log("Image processed successfully:", newAvatarPath);
 
-    // 🔸 Usunięcie pliku z tmp
+    console.log("Deleting temporary file...");
     await fs.unlink(tmpPath);
 
-    // 🔸 Aktualizacja użytkownika w bazie danych
     const avatarURL = `/avatars/${newAvatarName}`;
-    await User.findByIdAndUpdate(req.user._id, { avatarURL }, { new: true });
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { avatarURL },
+      { new: true }
+    );
+
+    console.log("Updated user avatar:", updatedUser);
 
     res.status(200).json({ avatarURL });
   } catch (error) {
