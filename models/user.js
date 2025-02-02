@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const gravatar = require("gravatar");
 
 const userSchema = new mongoose.Schema(
   {
@@ -19,6 +20,13 @@ const userSchema = new mongoose.Schema(
     token: {
       type: String,
       default: null,
+    },
+    avatarURL: {
+      type: String,
+      default: function () {
+        // Generowanie awatara na podstawie emaila użytkownika
+        return gravatar.url(this.email, { s: "250", d: "retro" }, true);
+      },
     },
   },
   { timestamps: true }

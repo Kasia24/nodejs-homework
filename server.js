@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./db");
 const contactsRouter = require("./routes/api/contacts");
 const path = require("path");
-const usersRouter = require("./routes/users");
+const usersRouter = require("./routes/api/users");
 
 dotenv.config();
 connectDB();
@@ -15,6 +15,8 @@ app.use("/api/contacts", contactsRouter);
 app.use("/api/users", usersRouter);
 
 app.use(express.static(path.join(__dirname, "public")));
+
+app.use("/avatars", express.static("public/avatars"));
 
 const PORT = process.env.PORT || 5000;
 

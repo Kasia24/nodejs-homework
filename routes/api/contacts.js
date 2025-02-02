@@ -52,6 +52,8 @@ router.post("/", async (req, res) => {
 
   try {
     const newContact = await Contact.create({ name, email, phone, favorite }); // Tworzenie nowego kontaktu
+    console.log("Avatar URL:", newContact.avatarURL);
+
     res.status(201).json(newContact);
   } catch (error) {
     res.status(500).json({ message: error.message });
