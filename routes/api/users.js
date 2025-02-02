@@ -68,31 +68,45 @@ router.patch("/avatars", auth, upload.single("avatar"), async (req, res) => {
   }
 
   const { path: tmpPath } = req.file;
-  const newAvatarName = `${req.user._id}-${Date.now()}.jpg`;
-  const newAvatarPath = path.join(avatarsDir, newAvatarName);
+  console.log("Uploaded file path:", tmpPath); // Dodajemy log ścieżki do pliku
 
+  // Sprawdzamy, czy plik istnieje przed przetworzeniem
   try {
-    console.log("Checking file existence:", tmpPath);
+    const fileExists = fs.existsSync(tmpPath);
+    if (!fileExists) {
+      console.log("Uploaded file does not exist");
+      return res.status(400).json({ message: "File does not exist" });
+    }
+    console.log("File exists. Proceeding with avatar processing.");
+
+    const newAvatarName = `${req.user._id}-${Date.now()}.jpg`;
+    const newAvatarPath = path.join(avatarsDir, newAvatarName);
+
     // 🔸 Przetwarzanie obrazu za pomocą Jimp
-    const image = await Jimp.read(tmpPath);
-    console.log("Image loaded successfully");
+    try {
+      const image = await Jimp.read(tmpPath); // Próba wczytania obrazu
+      console.log("Image loaded successfully");
 
-    await image.resize(250, 250).writeAsync(newAvatarPath);
-    console.log(`Image resized and saved to ${newAvatarPath}`);
+      await image.resize(250, 250).writeAsync(newAvatarPath);
+      console.log(`Image resized and saved to ${newAvatarPath}`);
 
-    // 🔸 Usunięcie pliku z tmp
-    await fs.unlink(tmpPath);
-    console.log("Temporary file deleted");
+      // 🔸 Usunięcie pliku z tmp
+      await fs.unlink(tmpPath);
+      console.log("Temporary file deleted");
 
-    // 🔸 Aktualizacja użytkownika w bazie danych
-    const avatarURL = `/avatars/${newAvatarName}`;
-    await User.findByIdAndUpdate(req.user._id, { avatarURL }, { new: true });
-    console.log("User avatar updated");
+      // 🔸 Aktualizacja użytkownika w bazie danych
+      const avatarURL = `/avatars/${newAvatarName}`;
+      await User.findByIdAndUpdate(req.user._id, { avatarURL }, { new: true });
+      console.log("User avatar updated");
 
-    res.status(200).json({ avatarURL });
+      res.status(200).json({ avatarURL });
+    } catch (error) {
+      console.error("Error processing avatar with Jimp:", error);
+      res.status(500).json({ message: "Error processing avatar with Jimp" });
+    }
   } catch (error) {
-    console.error("Error processing avatar:", error);
-    res.status(500).json({ message: "Error processing avatar" });
+    console.error("Error checking file existence:", error);
+    res.status(500).json({ message: "Error checking file existence" });
   }
 });
 
