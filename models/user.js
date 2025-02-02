@@ -15,7 +15,12 @@ const userSchema = new mongoose.Schema({
     enum: ["starter", "pro", "business"],
     default: "starter",
   },
-  avatarURL: String,
+  avatarURL: {
+    type: String,
+    default: function () {
+      // Generowanie awatara na podstawie emaila użytkownika
+      return gravatar.url(this.email, { s: "250", d: "retro" }, true);
+    },
   verify: {
     type: Boolean,
     default: false,
