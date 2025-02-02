@@ -53,7 +53,10 @@ router.post("/signup", async (req, res) => {
       verificationToken,
     });
 
+    console.log("New user created:", newUser);
+
     await sendVerificationEmail(email, verificationToken);
+    console.log("Verification email sent to:", email);
 
     res.status(201).json({
       user: {
@@ -63,7 +66,8 @@ router.post("/signup", async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    console.error("🔥 Server error:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
