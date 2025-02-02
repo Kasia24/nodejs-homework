@@ -6,26 +6,17 @@ const fs = require("fs").promises;
 const path = require("path");
 const Jimp = require("jimp");
 const gravatar = require("gravatar");
+const { nanoid } = require("nanoid");
 
 const User = require("../../models/user");
 const auth = require("../../middlewares/auth");
 const upload = require("../../middlewares/upload");
+const { sendVerificationEmail } = require("../../services/emailService");
 
 const router = express.Router();
 const avatarsDir = path.join(__dirname, "../../public/avatars");
 
-// Walidacja rejestracji i logowania
-const signupSchema = Joi.object({
-  email: Joi.string().email().required(),
-  password: Joi.string().min(6).required(),
-});
-
-const loginSchema = Joi.object({
-  email: Joi.string().email().required(),
-  password: Joi.string().required(),
-});
-
-// 🔹 Rejestracja użytkownika
+// 🔹 Rejestracja użytkownika z weryfikacją e-mail
 router.post("/signup", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -41,13 +32,17 @@ router.post("/signup", async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const avatarURL = gravatar.url(email, { s: "250", d: "retro" }, true); // Domyślny awatar
+    const avatarURL = gravatar.url(email, { s: "250", d: "retro" }, true);
+    const verificationToken = nanoid();
 
     const newUser = await User.create({
       email,
       password: hashedPassword,
       avatarURL,
+      verificationToken,
     });
+
+    await sendVerificationEmail(email, verificationToken);
 
     res.status(201).json({
       user: {
@@ -110,7 +105,52 @@ router.patch("/avatars", auth, upload.single("avatar"), async (req, res) => {
   }
 });
 
-// 🔹 Logowanie użytkownika
+// 🔹 Weryfikacja e-maila użytkownika
+router.get("/verify/:verificationToken", async (req, res) => {
+  try {
+    const { verificationToken } = req.params;
+    const user = await User.findOne({ verificationToken });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.verify = true;
+    user.verificationToken = null;
+    await user.save();
+
+    res.status(200).json({ message: "Verification successful" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// 🔹 Ponowne wysłanie e-maila weryfikacyjnego
+router.post("/verify", async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: "Missing required field email" });
+  }
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  if (user.verify) {
+    return res
+      .status(400)
+      .json({ message: "Verification has already been passed" });
+  }
+
+  await sendVerificationEmail(user.email, user.verificationToken);
+
+  res.status(200).json({ message: "Verification email sent" });
+});
+
+// 🔹 Logowanie użytkownika (blokada niezarejestrowanych)
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -121,21 +161,19 @@ router.post("/login", async (req, res) => {
     }
 
     const user = await User.findOne({ email });
-    if (!user) {
+
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: "Email or password is wrong" });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: "Email or password is wrong" });
+    if (!user.verify) {
+      return res.status(403).json({ message: "Email not verified" });
     }
 
-    // Generowanie tokena JWT
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
 
-    // Przypisanie tokena do użytkownika
     user.token = token;
     await user.save();
 
